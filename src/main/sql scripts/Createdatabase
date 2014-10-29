@@ -1,0 +1,64 @@
+
+use database recommendersystemdb;
+
+create table flats (
+
+     id int primary key,
+     location text,
+     pricePerNight int,
+     currency varchar(15),
+
+     title text,
+     description text,
+
+     essentials bit,
+     tv bit,
+     cableTv bit,
+     airConditioning bit,
+     heating bit,
+     kitchen bit,
+     internet bit,
+     wirelessInternet bit,
+
+     hotTub bit,
+     washer bit,
+     pool bit,
+     dryer bit,
+     freeParkingOnPremises bit,
+     gym bit,
+     elevator bit,
+     inDoorFireplace bit,
+     buzzerIntercom bit,
+     doorman bit,
+     shampoo bit,
+
+     familyFriendly bit,
+     smokingAllowed bit,
+     suitableForEvents bit,
+     petsAllowed bit,
+     petsLivedOnThisProperty bit,
+     wheelchairAccessible bit,
+
+     smokeDetector bit,
+     carbonMonoxideDetector bit,
+     firstAidKit bit,
+     safetyCard bit,
+     fireExtinguiser bit,
+
+     bedrooms int,
+     beds int,
+     bathrooms int,
+
+     typeProperty varchar(20),
+     accomodates int,
+
+     countReview int,
+     ratingValue int);
+
+create table users(
+    id int primary key,
+    countReviewsFromHosts int);
+
+create table visitedflats (
+    user int references users,
+    flat int references flats);
