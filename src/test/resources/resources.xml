@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <samples>
+        <flats>
+            <name>Flat1</name>
+            <name>Flat2</name>
+            <name>Flat3</name>
+        </flats>
+
+        <userflats>
+            <name>UserFlats1</name>
+            <name>UserFlats2</name>
+            <name>UserFlats3</name>
+            <name>UserFlats4</name>
+        </userflats>
+
+        <users>
+            <name>User1</name>
+            <name>User2</name>
+            <name>User3</name>
+            <name>User4</name>
+        </users>
+    </samples>
+
+
+    <answers>
+        <flats>
+            <flat>
+                <flattitle>Theatre of Dreams - Vienna Loft</flattitle>
+                <id>1327090</id>
+                <pricepernight>80</pricepernight>
+                <quantityaccommodates>4</quantityaccommodates>
+                <countreviews>70</countreviews>
+                <rating>9</rating>
+                <Propertytype>Loft</Propertytype>
+                <quantitybeds>2</quantitybeds>
+                <quantitybathrooms>1</quantitybathrooms>
+                <quantitybedrooms>2</quantitybedrooms>
+                <currency>USD</currency>
+            </flat>
+
+            <flat>
+                <flattitle>Amazing 3 bed large APT ☛ 2 patios</flattitle>
+                <id>2058080</id>
+                <pricepernight>129</pricepernight>
+                <quantityaccommodates>7</quantityaccommodates>
+                <countreviews>33</countreviews>
+                <rating>10</rating>
+                <Propertytype>Apartment</Propertytype>
+                <quantitybeds>4</quantitybeds>
+                <quantitybathrooms>3</quantitybathrooms>
+                <quantitybedrooms>3</quantitybedrooms>
+                <currency>USD</currency>
+            </flat>
+
+            <flat>
+                <flattitle>Revy CPH</flattitle>
+                <id>3722745</id>
+                <pricepernight>34</pricepernight>
+                <quantityaccommodates>3</quantityaccommodates>
+                <countreviews>0</countreviews>
+                <rating>0</rating>
+                <Propertytype>House</Propertytype>
+                <quantitybeds>3</quantitybeds>
+                <quantitybathrooms>1</quantitybathrooms>
+                <quantitybedrooms>1</quantitybedrooms>
+                <currency>USD</currency>
+            </flat>
+
+        </flats>
+    </answers>
+</resources>

@@ -1,6 +1,4 @@
-package ru.cscenter.practice.recsys.Exceptions;
-
-import java.util.NoSuchElementException;
+package ru.cscenter.practice.recsys.exceptions;
 
 /**
  * Created by antonkozmirchuk on 26/10/14.

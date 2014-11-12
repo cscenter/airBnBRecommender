@@ -1,26 +1,21 @@
 package ru.cscenter.practice.recsys;
 
-
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.XPatherException;
-import ru.cscenter.practice.recsys.Exceptions.NoAreasException;
-import ru.cscenter.practice.recsys.Exceptions.TooManyAreasException;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import ru.cscenter.practice.recsys.exceptions.NoAreasException;
+import ru.cscenter.practice.recsys.exceptions.TooManyAreasException;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Parser<T> {
-    private final TagNode htmlPage;
 
-    Parser(TagNode htmlPage) {
-        if (htmlPage == null) {
-            throw new IllegalArgumentException("html page can't be null");
-        }
-        this.htmlPage = htmlPage;
-    }
+    public abstract T parse(final WebDriver htmlPage);
 
-    public abstract T parse();
-
-    protected String[] getFeatures(String expression) {
+    public static String[] getFeatures0(final TagNode htmlPage, final String expression) {
 
         if (expression == null)
             return new String[]{};
@@ -29,15 +24,14 @@ public abstract class Parser<T> {
 
         try {
             items = htmlPage.evaluateXPath(expression);
-
         } catch (XPatherException e) {
-            throw new IllegalArgumentException(expression + "is invalid and invokes error");
+            throw new IllegalArgumentException(expression + " is invalid and invokes error");
         }
 
-        String[] result = new String[items.length];
+        final String[] result = new String[items.length];
 
         for (int i = 0; i < items.length; ++i) {
-            if (items[i] instanceof TagNode)
+            if (items[i] instanceof WebDriver)
                 result[i] = ((TagNode) items[i]).getText().toString();
             else
                 result[i] = (String) items[i];
@@ -45,8 +39,31 @@ public abstract class Parser<T> {
         return result;
     }
 
-    protected String getFeature(String expression) throws TooManyAreasException, NoAreasException {
-        String[] result = getFeatures(expression);
+    public static String[] getFeatures(final WebDriver htmlPage, final String expression, String attribute) {
+        if (expression == null)
+            return new String[]{};
+        
+        List<WebElement> items = htmlPage.findElements(By.xpath(expression));
+
+        final String[] result = new String[items.size()];
+        
+        for (int i = 0; i < items.size(); ++i) {
+            if(attribute != null)
+                result[i] = items.get(0).getAttribute(attribute);
+            else
+                result[i] = items.get(i).getText();
+        }
+        return result;
+        
+    }
+
+    public static String[] getFeatures(final WebDriver htmlPage, final String expression) {
+        return getFeatures(htmlPage, expression, null);
+    }
+
+
+    public static String getFeature(final WebDriver htmlPage, final String expression, final String attribute) throws TooManyAreasException, NoAreasException {
+        final String[] result = getFeatures(htmlPage, expression, attribute);
         if (result.length > 1)
             throw new TooManyAreasException("html file contains more than one areas that fit for object");
         if (result.length == 0)
@@ -54,66 +71,59 @@ public abstract class Parser<T> {
 
         return result[0];
     }
+    public static String getFeature(final WebDriver htmlPage, final String expression) throws TooManyAreasException, NoAreasException  {
+        return getFeature(htmlPage, expression, null);
+    }
 
-    protected int countFeatures(String expression) {
+    public static int countFeatures(final WebDriver htmlPage, final String expression) {
 
-        String[] features = getFeatures(expression);
+        final String[] features = getFeatures(htmlPage, expression);
         return features.length;
     }
+    public static int countFeatures(final WebDriver htmlPage, final String expression, final String attribute) {
 
-
-    protected int getNumber(String string) // returns the first number in string
-    {
-        if (string == null || string.equals(""))
-            return 0;
-
-        int position = 0, result = 0;
-
-        while ((position < string.length()) && (string.charAt(position) > '9' || string.charAt(position) < '0'))
-            ++position;
-
-        while ((position < string.length()) && (string.charAt(position) <= '9') && (string.charAt(position) >= '0')) {
-            result = result * 10 + string.charAt(position) - '0';
-            ++position;
-        }
-        return result;
+        return countFeatures(htmlPage, expression, attribute);
     }
 
-    protected static String removeSkipSymbols(CharSequence string) {
+    public static int getNumber(final String string) // if string contains more than one number then method return wrong number
+    {
+        if (string == null)
+            return 0;
+        final String number = string.replaceAll("\\D+","");
+        return number.matches("\\d+") ? Integer.parseInt(number) : 0 ;
+    }
 
-        if (string == null || string == "")
+    public static String removeSkipSymbols(final String string) {
+
+        if (string == null)
             return "";
 
-        StringBuilder builder = new StringBuilder();
+        final String[] words = string.split("\\s+");
+        final StringBuilder builder = new StringBuilder();
 
-        int leftPosition = 0, rightPosition = string.length() - 1;
-
-        char currentChar = string.charAt(leftPosition);
-        while (currentChar == ' ' || currentChar == '\n') {
-            currentChar = string.charAt(++leftPosition);
+        for(String currentWord : words) {
+            if(currentWord.matches("\\S+"))
+                builder.append(currentWord).append(" ");
         }
 
-        currentChar = string.charAt(rightPosition);
-        while (currentChar == ' ' || currentChar == '\n') {
-            currentChar = string.charAt(--rightPosition);
-        }
-
-
-        for (int i = leftPosition; i <= rightPosition; ++i)
-            builder.append(string.charAt(i));
-
+        if(builder.length() > 0)
+            builder.deleteCharAt(builder.length()-1);
 
         return builder.toString();
     }
 
-    protected ArrayList<Integer> getIds(String expression) {
-        final String[] userIds = getFeatures(expression);
-        ArrayList<Integer> result = new ArrayList<>();
+    public static List<Integer> getIds(final WebDriver htmlPage, final String expression) {
+        final String[] userIds = getFeatures(htmlPage, expression);
+        final ArrayList<Integer> result = new ArrayList<>();
 
         for (String currentUserId : userIds)
             result.add(getNumber(currentUserId));
 
         return result;
+    }
+
+    public static List<Integer> getIds(final WebDriver htmlPage, final String expression, final String attribute) {
+        return getIds(htmlPage, expression, attribute);
     }
 
 }

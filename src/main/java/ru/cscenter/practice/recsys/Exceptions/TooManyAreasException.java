@@ -1,4 +1,4 @@
-package ru.cscenter.practice.recsys.Exceptions;
+package ru.cscenter.practice.recsys.exceptions;
 
 /**
  * Created by antonkozmirchuk on 20/10/14.

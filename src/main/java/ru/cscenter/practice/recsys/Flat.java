@@ -1,6 +1,6 @@
 package ru.cscenter.practice.recsys;
 
-import ru.cscenter.practice.recsys.Enums.PropertyType;
+import ru.cscenter.practice.recsys.enums.PropertyType;
 
 import java.io.Serializable;
 import java.util.Currency;
@@ -11,7 +11,10 @@ public class Flat implements Serializable {
     private final int id;
 
     /* Location */
-    private final String location;
+    private final String city;
+    private final String district;
+    private final String country;
+
 
     /* Pricing */
     private final int pricePerNight;
@@ -74,7 +77,9 @@ public class Flat implements Serializable {
 
     private Flat(FlatBuilder builder) {
         this.id = builder.id;
-        this.location = builder.location;
+        this.city = builder.city;
+        this.district = builder.district;
+        this.country = builder.country;
         this.pricePerNight = builder.pricePerNight;
         this.currency = builder.currency;
         this.title = builder.title;
@@ -118,156 +123,20 @@ public class Flat implements Serializable {
         this.ratingValue = builder.ratingValue;
     }
 
-    @Override
-    public String toString() {
-        return "Flat{" +
-                "id=" + id +
-                ", location='" + location + '\'' +
-                ", pricePerNight=" + pricePerNight +
-                ", currency=" + currency +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", essentials=" + essentials +
-                ", tv=" + tv +
-                ", cableTv=" + cableTv +
-                ", airConditioning=" + airConditioning +
-                ", heating=" + heating +
-                ", kitchen=" + kitchen +
-                ", internet=" + internet +
-                ", wirelessInternet=" + wirelessInternet +
-                ", hotTub=" + hotTub +
-                ", washer=" + washer +
-                ", pool=" + pool +
-                ", dryer=" + dryer +
-                ", freeParkingOnPremises=" + freeParkingOnPremises +
-                ", gym=" + gym +
-                ", elevator=" + elevator +
-                ", inDoorFireplace=" + inDoorFireplace +
-                ", buzzerIntercom=" + buzzerIntercom +
-                ", doorman=" + doorman +
-                ", shampoo=" + shampoo +
-                ", familyFriendly=" + familyFriendly +
-                ", smokingAllowed=" + smokingAllowed +
-                ", suitableForEvents=" + suitableForEvents +
-                ", petsAllowed=" + petsAllowed +
-                ", petsLivedOnThisProperty=" + petsLivedOnThisProperty +
-                ", wheelchairAccessible=" + wheelchairAccessible +
-                ", smokeDetector=" + smokeDetector +
-                ", carbonMonoxideDetector=" + carbonMonoxideDetector +
-                ", firstAidKit=" + firstAidKit +
-                ", safetyCard=" + safetyCard +
-                ", fireExtinguiser=" + fireExtinguiser +
-                ", bedrooms=" + bedrooms +
-                ", beds=" + beds +
-                ", bathrooms=" + bathrooms +
-                ", typeProperty=" + typeProperty +
-                ", accomodates=" + accomodates +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Flat flat = (Flat) o;
-
-        if (accomodates != flat.accomodates) return false;
-        if (airConditioning != flat.airConditioning) return false;
-        if (bathrooms != flat.bathrooms) return false;
-        if (bedrooms != flat.bedrooms) return false;
-        if (beds != flat.beds) return false;
-        if (buzzerIntercom != flat.buzzerIntercom) return false;
-        if (cableTv != flat.cableTv) return false;
-        if (carbonMonoxideDetector != flat.carbonMonoxideDetector) return false;
-        if (doorman != flat.doorman) return false;
-        if (dryer != flat.dryer) return false;
-        if (elevator != flat.elevator) return false;
-        if (essentials != flat.essentials) return false;
-        if (familyFriendly != flat.familyFriendly) return false;
-        if (fireExtinguiser != flat.fireExtinguiser) return false;
-        if (firstAidKit != flat.firstAidKit) return false;
-        if (freeParkingOnPremises != flat.freeParkingOnPremises) return false;
-        if (gym != flat.gym) return false;
-        if (heating != flat.heating) return false;
-        if (hotTub != flat.hotTub) return false;
-        if (id != flat.id) return false;
-        if (inDoorFireplace != flat.inDoorFireplace) return false;
-        if (internet != flat.internet) return false;
-        if (kitchen != flat.kitchen) return false;
-        if (petsAllowed != flat.petsAllowed) return false;
-        if (petsLivedOnThisProperty != flat.petsLivedOnThisProperty) return false;
-        if (pool != flat.pool) return false;
-        if (pricePerNight != flat.pricePerNight) return false;
-        if (safetyCard != flat.safetyCard) return false;
-        if (shampoo != flat.shampoo) return false;
-        if (smokeDetector != flat.smokeDetector) return false;
-        if (smokingAllowed != flat.smokingAllowed) return false;
-        if (suitableForEvents != flat.suitableForEvents) return false;
-        if (tv != flat.tv) return false;
-        if (washer != flat.washer) return false;
-        if (wheelchairAccessible != flat.wheelchairAccessible) return false;
-        if (wirelessInternet != flat.wirelessInternet) return false;
-        if (currency != null ? !currency.equals(flat.currency) : flat.currency != null) return false;
-        if (description != null ? !description.equals(flat.description) : flat.description != null) return false;
-        if (location != null ? !location.equals(flat.location) : flat.location != null) return false;
-        if (title != null ? !title.equals(flat.title) : flat.title != null) return false;
-        return typeProperty == flat.typeProperty;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (location != null ? location.hashCode() : 0);
-        result = 31 * result + pricePerNight;
-        result = 31 * result + (currency != null ? currency.hashCode() : 0);
-        result = 31 * result + (title != null ? title.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (essentials ? 1 : 0);
-        result = 31 * result + (tv ? 1 : 0);
-        result = 31 * result + (cableTv ? 1 : 0);
-        result = 31 * result + (airConditioning ? 1 : 0);
-        result = 31 * result + (heating ? 1 : 0);
-        result = 31 * result + (kitchen ? 1 : 0);
-        result = 31 * result + (internet ? 1 : 0);
-        result = 31 * result + (wirelessInternet ? 1 : 0);
-        result = 31 * result + (hotTub ? 1 : 0);
-        result = 31 * result + (washer ? 1 : 0);
-        result = 31 * result + (pool ? 1 : 0);
-        result = 31 * result + (dryer ? 1 : 0);
-        result = 31 * result + (freeParkingOnPremises ? 1 : 0);
-        result = 31 * result + (gym ? 1 : 0);
-        result = 31 * result + (elevator ? 1 : 0);
-        result = 31 * result + (inDoorFireplace ? 1 : 0);
-        result = 31 * result + (buzzerIntercom ? 1 : 0);
-        result = 31 * result + (doorman ? 1 : 0);
-        result = 31 * result + (shampoo ? 1 : 0);
-        result = 31 * result + (familyFriendly ? 1 : 0);
-        result = 31 * result + (smokingAllowed ? 1 : 0);
-        result = 31 * result + (suitableForEvents ? 1 : 0);
-        result = 31 * result + (petsAllowed ? 1 : 0);
-        result = 31 * result + (petsLivedOnThisProperty ? 1 : 0);
-        result = 31 * result + (wheelchairAccessible ? 1 : 0);
-        result = 31 * result + (smokeDetector ? 1 : 0);
-        result = 31 * result + (carbonMonoxideDetector ? 1 : 0);
-        result = 31 * result + (firstAidKit ? 1 : 0);
-        result = 31 * result + (safetyCard ? 1 : 0);
-        result = 31 * result + (fireExtinguiser ? 1 : 0);
-        result = 31 * result + bedrooms;
-        result = 31 * result + beds;
-        result = 31 * result + bathrooms;
-        result = 31 * result + (typeProperty != null ? typeProperty.hashCode() : 0);
-        result = 31 * result + accomodates;
-        return result;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
     public int getId() {
         return id;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public String getCountry() {
+        return country;
     }
 
     public int getPricePerNight() {
@@ -434,9 +303,164 @@ public class Flat implements Serializable {
         return ratingValue;
     }
 
+    @Override
+    public String toString() {
+        return "Flat{" +
+                "id=" + id +
+                ", city='" + city + '\'' +
+                ", district='" + district + '\'' +
+                ", country='" + country + '\'' +
+                ", pricePerNight=" + pricePerNight +
+                ", currency=" + currency +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", essentials=" + essentials +
+                ", tv=" + tv +
+                ", cableTv=" + cableTv +
+                ", airConditioning=" + airConditioning +
+                ", heating=" + heating +
+                ", kitchen=" + kitchen +
+                ", internet=" + internet +
+                ", wirelessInternet=" + wirelessInternet +
+                ", hotTub=" + hotTub +
+                ", washer=" + washer +
+                ", pool=" + pool +
+                ", dryer=" + dryer +
+                ", freeParkingOnPremises=" + freeParkingOnPremises +
+                ", gym=" + gym +
+                ", elevator=" + elevator +
+                ", inDoorFireplace=" + inDoorFireplace +
+                ", buzzerIntercom=" + buzzerIntercom +
+                ", doorman=" + doorman +
+                ", shampoo=" + shampoo +
+                ", familyFriendly=" + familyFriendly +
+                ", smokingAllowed=" + smokingAllowed +
+                ", suitableForEvents=" + suitableForEvents +
+                ", petsAllowed=" + petsAllowed +
+                ", petsLivedOnThisProperty=" + petsLivedOnThisProperty +
+                ", wheelchairAccessible=" + wheelchairAccessible +
+                ", smokeDetector=" + smokeDetector +
+                ", carbonMonoxideDetector=" + carbonMonoxideDetector +
+                ", firstAidKit=" + firstAidKit +
+                ", safetyCard=" + safetyCard +
+                ", fireExtinguiser=" + fireExtinguiser +
+                ", bedrooms=" + bedrooms +
+                ", beds=" + beds +
+                ", bathrooms=" + bathrooms +
+                ", typeProperty=" + typeProperty +
+                ", accomodates=" + accomodates +
+                ", countReview=" + countReview +
+                ", ratingValue=" + ratingValue +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Flat flat = (Flat) o;
+
+        if (accomodates != flat.accomodates) return false;
+        if (airConditioning != flat.airConditioning) return false;
+        if (bathrooms != flat.bathrooms) return false;
+        if (bedrooms != flat.bedrooms) return false;
+        if (beds != flat.beds) return false;
+        if (buzzerIntercom != flat.buzzerIntercom) return false;
+        if (cableTv != flat.cableTv) return false;
+        if (carbonMonoxideDetector != flat.carbonMonoxideDetector) return false;
+        if (doorman != flat.doorman) return false;
+        if (dryer != flat.dryer) return false;
+        if (elevator != flat.elevator) return false;
+        if (essentials != flat.essentials) return false;
+        if (familyFriendly != flat.familyFriendly) return false;
+        if (fireExtinguiser != flat.fireExtinguiser) return false;
+        if (firstAidKit != flat.firstAidKit) return false;
+        if (freeParkingOnPremises != flat.freeParkingOnPremises) return false;
+        if (gym != flat.gym) return false;
+        if (heating != flat.heating) return false;
+        if (hotTub != flat.hotTub) return false;
+        if (id != flat.id) return false;
+        if (inDoorFireplace != flat.inDoorFireplace) return false;
+        if (internet != flat.internet) return false;
+        if (kitchen != flat.kitchen) return false;
+        if (petsAllowed != flat.petsAllowed) return false;
+        if (petsLivedOnThisProperty != flat.petsLivedOnThisProperty) return false;
+        if (pool != flat.pool) return false;
+        if (pricePerNight != flat.pricePerNight) return false;
+        if (safetyCard != flat.safetyCard) return false;
+        if (shampoo != flat.shampoo) return false;
+        if (smokeDetector != flat.smokeDetector) return false;
+        if (smokingAllowed != flat.smokingAllowed) return false;
+        if (suitableForEvents != flat.suitableForEvents) return false;
+        if (tv != flat.tv) return false;
+        if (washer != flat.washer) return false;
+        if (wheelchairAccessible != flat.wheelchairAccessible) return false;
+        if (wirelessInternet != flat.wirelessInternet) return false;
+        if (city != null ? !city.equals(flat.city) : flat.city != null) return false;
+        if (country != null ? !country.equals(flat.country) : flat.country != null) return false;
+        if (currency != null ? !currency.equals(flat.currency) : flat.currency != null) return false;
+        if (description != null ? !description.equals(flat.description) : flat.description != null) return false;
+        if (district != null ? !district.equals(flat.district) : flat.district != null) return false;
+        if (title != null ? !title.equals(flat.title) : flat.title != null) return false;
+        if (typeProperty != flat.typeProperty) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (city != null ? city.hashCode() : 0);
+        result = 31 * result + (district != null ? district.hashCode() : 0);
+        result = 31 * result + (country != null ? country.hashCode() : 0);
+        result = 31 * result + pricePerNight;
+        result = 31 * result + (currency != null ? currency.hashCode() : 0);
+        result = 31 * result + (title != null ? title.hashCode() : 0);
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (essentials ? 1 : 0);
+        result = 31 * result + (tv ? 1 : 0);
+        result = 31 * result + (cableTv ? 1 : 0);
+        result = 31 * result + (airConditioning ? 1 : 0);
+        result = 31 * result + (heating ? 1 : 0);
+        result = 31 * result + (kitchen ? 1 : 0);
+        result = 31 * result + (internet ? 1 : 0);
+        result = 31 * result + (wirelessInternet ? 1 : 0);
+        result = 31 * result + (hotTub ? 1 : 0);
+        result = 31 * result + (washer ? 1 : 0);
+        result = 31 * result + (pool ? 1 : 0);
+        result = 31 * result + (dryer ? 1 : 0);
+        result = 31 * result + (freeParkingOnPremises ? 1 : 0);
+        result = 31 * result + (gym ? 1 : 0);
+        result = 31 * result + (elevator ? 1 : 0);
+        result = 31 * result + (inDoorFireplace ? 1 : 0);
+        result = 31 * result + (buzzerIntercom ? 1 : 0);
+        result = 31 * result + (doorman ? 1 : 0);
+        result = 31 * result + (shampoo ? 1 : 0);
+        result = 31 * result + (familyFriendly ? 1 : 0);
+        result = 31 * result + (smokingAllowed ? 1 : 0);
+        result = 31 * result + (suitableForEvents ? 1 : 0);
+        result = 31 * result + (petsAllowed ? 1 : 0);
+        result = 31 * result + (petsLivedOnThisProperty ? 1 : 0);
+        result = 31 * result + (wheelchairAccessible ? 1 : 0);
+        result = 31 * result + (smokeDetector ? 1 : 0);
+        result = 31 * result + (carbonMonoxideDetector ? 1 : 0);
+        result = 31 * result + (firstAidKit ? 1 : 0);
+        result = 31 * result + (safetyCard ? 1 : 0);
+        result = 31 * result + (fireExtinguiser ? 1 : 0);
+        result = 31 * result + bedrooms;
+        result = 31 * result + beds;
+        result = 31 * result + bathrooms;
+        result = 31 * result + (typeProperty != null ? typeProperty.hashCode() : 0);
+        result = 31 * result + accomodates;
+        return result;
+    }
+
     public static class FlatBuilder {
         private int id;
-        private String location;
+        private String city;
+        private String district;
+        private String country;
 
         /* Pricing */
         private int pricePerNight;
@@ -501,8 +525,16 @@ public class Flat implements Serializable {
             this.id = id;
         }
 
-        public void setLocation(String location) {
-            this.location = location;
+        public void setCity(String city) {
+            this.city = city;
+        }
+
+        public void setDistrict(String district) {
+            this.district = district;
+        }
+
+        public void setCountry(String country) {
+            this.country = country;
         }
 
         public void setPricePerNight(int pricePerNight) {

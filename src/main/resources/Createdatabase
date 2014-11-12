@@ -4,12 +4,16 @@ use database recommendersystemdb;
 create table flats (
 
      id int primary key,
-     location text,
+
+     city varchar(60),
+     district varchar(60),
+     country varchar(60),
+
      pricePerNight int,
      currency varchar(15),
 
-     title text,
-     description text,
+     title varchar(100),
+     description text(1000),
 
      essentials bit,
      tv bit,
@@ -62,3 +66,11 @@ create table users(
 create table visitedflats (
     user int references users,
     flat int references flats);
+
+create table language (
+  id  int auto_increment primary key,
+  value varchar(30) CHARACTER SET utf8 COLLATE utf8_unicode_ci );
+
+create table languagesOfUser (
+    language int references language,
+    user int references users);

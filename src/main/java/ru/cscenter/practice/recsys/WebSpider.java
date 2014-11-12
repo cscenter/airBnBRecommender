@@ -3,6 +3,7 @@ package ru.cscenter.practice.recsys;
 import org.apache.log4j.Logger;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
+import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
 import java.net.URL;
@@ -12,12 +13,12 @@ import java.util.*;
 public class WebSpider {
     private static final String FLAT_ADDRESS = "https://www.airbnb.com/rooms/";
     private static final String USER_ADDRESS = "https://www.airbnb.com/users/show/";
-    private static final HtmlCleaner cleaner = new HtmlCleaner();
+    private static final String FLATS_OF_USER_EXPRESSION = "https://www.airbnb.com/s?host_id=";
+    private final Logger logger = Logger.getLogger(WebSpider.class.getName());
+    private final WebDriver webDriver;
 
-    private static final Logger logger = Logger.getLogger(WebSpider.class.getName());
-
-    public static TagNode downloadHtmlPage(String address) throws IOException {
-        return cleaner.clean(new URL(address));
+    public WebSpider(WebDriver webDriver) {
+        this.webDriver = webDriver;
     }
 
     public void DiscoverHostUsersThenFlats(int globalHostUserId, final int quantityFlats, final int quantityUsers)
@@ -26,10 +27,11 @@ public class WebSpider {
             throw new IllegalArgumentException("parameters have illegal values");
         }
 
-        LinkedList<Pair<Integer, Integer>> usersQueue = new LinkedList<>();
+        final LinkedList<Pair<Integer, Integer>> usersQueue = new LinkedList<>();
 
-        FlatParser flatParser;
-        UserParser userParser;
+        final FlatParser flatParser = new FlatParser();
+        final UserParser userParser = new UserParser();
+        final FlatPageParser flatPageParser = new FlatPageParser();
 
         int countFlats = 0, countUsers = 0;
 
@@ -39,8 +41,7 @@ public class WebSpider {
                     usersQueue.push(Pair.of(globalHostUserId++, -1));
                 }
 
-                Pair<Integer, Integer> currentHostUser = usersQueue.getFirst();
-                usersQueue.removeFirst();
+                final Pair<Integer, Integer> currentHostUser = usersQueue.pop();
 
                 if (currentHostUser.snd() != -1) {
                     connection.putVisitedFlat(currentHostUser.fst(), currentHostUser.snd());
@@ -51,47 +52,46 @@ public class WebSpider {
                 }
 
                 logger.debug("processing user " + currentHostUser.fst);
-                userParser = new UserParser(downloadHtmlPage(USER_ADDRESS + currentHostUser.fst()));
-                User newUser = userParser.parse();
+
+                webDriver.get(USER_ADDRESS + currentHostUser.fst());
+                final User newUser = userParser.parse(webDriver);
 
                 if (currentHostUser.fst() != newUser.getId() || newUser.getId() == 0) {
                     continue;
                 }
 
-                if (currentHostUser.snd() != -1) {
-                    newUser.addVisitedFlat(currentHostUser.snd());
-
-                }
-
                 connection.putUserIntoDatabase(newUser);
                 ++countUsers;
 
-                ArrayList<Integer> listiningsOfHostUser = userParser.getFlatIds();
-                ArrayList<Integer> usersFromComments = userParser.getUserHostIdsFromComments();
 
+                final List<Integer> usersFromComments = UserParser.getUserHostIdsFromComments(webDriver);
                 usersQueue.addAll(makeArrayOfPair(usersFromComments, -1));
 
-                for (Integer currentFlatId : listiningsOfHostUser) {
-                    if (connection.containsFlat(currentFlatId)) {
-                        continue;
+                if(UserParser.hasFlats(webDriver)) {
+                    webDriver.get(FLATS_OF_USER_EXPRESSION + currentHostUser.fst);
+                    final List<Integer> listiningsOfHostUser = flatPageParser.parse(webDriver);
+
+                    for (Integer currentFlatId : listiningsOfHostUser) {
+                        if (connection.containsFlat(currentFlatId)) {
+                            continue;
+                        }
+
+                        logger.debug("processing flat " + currentFlatId);
+
+                        webDriver.get(FLAT_ADDRESS + currentFlatId);
+                        final Flat flat = flatParser.parse(webDriver);
+
+                        if (flat.getId() != currentFlatId || flat.getId() == 0) {
+                            continue;
+                        }
+
+                        connection.putFlatIntoDatabase(flat);
+                        ++countFlats;
+
+                        final List<Integer> usersFromFlatComments = flatParser.getUserIdsFromComments(webDriver);
+                        usersQueue.addAll(makeArrayOfPair(usersFromFlatComments, currentFlatId));
                     }
-
-                    logger.debug("processing flat " + currentFlatId);
-
-                    flatParser = new FlatParser(downloadHtmlPage(FLAT_ADDRESS + currentFlatId));
-                    Flat flat = flatParser.parse();
-
-                    if (flat.getId() != currentFlatId || flat.getId() == 0) {
-                        continue;
-                    }
-
-                    connection.putFlatIntoDatabase(flat);
-                    ++countFlats;
-
-                    ArrayList<Integer> usersFromFlatComments = flatParser.getUserIdsFromComments();
-                    usersQueue.addAll(makeArrayOfPair(usersFromFlatComments, currentFlatId));
                 }
-
             }
         } catch (SQLException e) {
             logger.debug(e.getMessage());
@@ -101,8 +101,8 @@ public class WebSpider {
 
     }
 
-    private ArrayList<Pair<Integer, Integer>> makeArrayOfPair(ArrayList<Integer> arrayOfUsers, Integer flatId) {
-        ArrayList<Pair<Integer, Integer>> result = new ArrayList<>();
+    private List<Pair<Integer, Integer>> makeArrayOfPair(final List<Integer> arrayOfUsers, final Integer flatId) {
+        final List<Pair<Integer, Integer>> result = new ArrayList<>();
 
         for (Integer currentUserIdFromComment : arrayOfUsers)
             result.add(Pair.of(currentUserIdFromComment, flatId));
@@ -111,8 +111,8 @@ public class WebSpider {
 
     private static class Pair<A, B> {
 
-        private A fst;
-        private B snd;
+        private final A fst;
+        private final B snd;
 
         private Pair(A a, B b) {
             this.fst = a;

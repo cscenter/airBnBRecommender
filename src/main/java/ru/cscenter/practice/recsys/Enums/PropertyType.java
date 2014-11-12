@@ -1,4 +1,4 @@
-package ru.cscenter.practice.recsys.Enums;
+package ru.cscenter.practice.recsys.enums;
 
 
 public enum PropertyType {
@@ -44,4 +44,8 @@ public enum PropertyType {
         return null;
     }
 
+    @Override
+    public String toString() {
+        return getType();
+    }
 }

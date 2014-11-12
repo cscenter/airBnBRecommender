@@ -1,8 +1,5 @@
 package ru.cscenter.practice.recsys;
 
-
-import ru.cscenter.practice.recsys.Enums.Language;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -13,7 +10,7 @@ public class User {
 
     private ArrayList<Integer> visitedFlats = new ArrayList<>();
 
-    public User(int id, Language[] languages, int countReviewsFromHosts) {
+    public User(final int id,final  Language[] languages, final int countReviewsFromHosts) {
         this.id = id;
         this.languages = languages;
         this.countReviewsFromHosts = countReviewsFromHosts;
@@ -47,8 +44,7 @@ public class User {
         User user = (User) o;
 
         if (countReviewsFromHosts != user.countReviewsFromHosts) return false;
-        if (id != user.id) return false;
-        return Arrays.equals(languages, user.languages);
+        return id == user.id && Arrays.equals(languages, user.languages);
 
     }
 
@@ -59,4 +55,7 @@ public class User {
         result = 31 * result + countReviewsFromHosts;
         return result;
     }
+
+
+
 }
