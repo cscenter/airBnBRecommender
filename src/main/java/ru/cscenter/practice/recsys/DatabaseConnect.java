@@ -14,7 +14,7 @@ public class DatabaseConnect implements AutoCloseable {
 
     private Connection connection;
 
-    private Logger logger = Logger.getLogger(DatabaseConnect.class);
+    private final Logger logger = Logger.getLogger(DatabaseConnect.class);
 
     public DatabaseConnect() throws SQLException {
 

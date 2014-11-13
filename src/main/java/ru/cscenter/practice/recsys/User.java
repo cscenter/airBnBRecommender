@@ -8,7 +8,7 @@ public class User {
     private final Language[] languages;
     private final int countReviewsFromHosts;
 
-    private ArrayList<Integer> visitedFlats = new ArrayList<>();
+    private final ArrayList<Integer> visitedFlats = new ArrayList<>();
 
     public User(final int id,final  Language[] languages, final int countReviewsFromHosts) {
         this.id = id;

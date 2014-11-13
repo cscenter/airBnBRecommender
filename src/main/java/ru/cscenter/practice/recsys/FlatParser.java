@@ -1,14 +1,12 @@
 package ru.cscenter.practice.recsys;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import ru.cscenter.practice.recsys.enums.PropertyType;
 import ru.cscenter.practice.recsys.exceptions.NoAreasException;
 import ru.cscenter.practice.recsys.exceptions.TooManyAreasException;
 
-import java.util.Currency;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class FlatParser extends Parser {
 
@@ -22,16 +20,18 @@ public class FlatParser extends Parser {
     private static final String USER_IDS_EXPRESSION = "//div[@class='col-3']/div[@class='pull-right']/" +
             "div[@class='name text-center']/a";
 
-    private static final String COUNT_REVIEW_EXPRESSION = "//div[@id='reviews']//div[@class='col-8']/div[@class = 'panel-body']"
-            + "/h4[@class='row-space-4']";
-    private static final String COUNT_RATING_EXPRESSION =
-            COUNT_REVIEW_EXPRESSION + "/div[@class='star-rating']/div[@class = 'foreground']";
+    private static final String COUNT_REVIEW_EXPRESSION = "//a[@href='#reviews']/span";
 
+    private static final String COUNT_RATING_EXPRESSION =
+            "//div[@id='reviews']//div[@class='col-8']/div[@class = 'panel-body']"
+                    + "/h4[@class='row-space-4']/div[@class='star-rating']/div[@class = 'foreground']";
+
+    private static final String LOAD_MORE_COMMENTS = "//li[@class='next next_page']/a";
     private static final Logger logger = Logger.getLogger(FlatParser.class.getName());
 
     public FlatParser() {}
 
-    public Flat parse(WebDriver htmlPage) {
+    public Flat parse(final WebDriver htmlPage) {
 
         if (htmlPage == null) {
             throw new IllegalArgumentException("html page can't be null");
@@ -60,8 +60,8 @@ public class FlatParser extends Parser {
 
     }
 
-    public static String[] getAmenities(WebDriver htmlPage) {
-        String[] result = getFeatures(htmlPage, AMENITIES_EXPRESSION);
+    public static String[] getAmenities(final WebDriver htmlPage) {
+        final String[] result = getFeatures(htmlPage, AMENITIES_EXPRESSION);
 
         for (int i = 0; i < result.length; ++i) {
             result[i] = removeSkipSymbols(result[i]);
@@ -69,7 +69,7 @@ public class FlatParser extends Parser {
         return result;
     }
 
-    public static String getDescription(WebDriver htmlPage) {
+    public static String getDescription(final WebDriver htmlPage) {
         String description = "";
 
         try {
@@ -81,7 +81,7 @@ public class FlatParser extends Parser {
         return description;
     }
 
-    public static String getLocation(WebDriver htmlPage) {
+    public static String getLocation(final WebDriver htmlPage) {
         String location = "";
 
         try {
@@ -93,7 +93,7 @@ public class FlatParser extends Parser {
         return location;
     }
 
-    public static int getPricePerNight(WebDriver htmlPage) {
+    public static int getPricePerNight(final WebDriver htmlPage) {
         String price = "";
         try {
             price = getFeature(htmlPage, PRICE_EXPRESSION);
@@ -104,7 +104,7 @@ public class FlatParser extends Parser {
         return getNumber(price);
     }
 
-    public static Currency getCurrency(WebDriver htmlPage) {
+    public static Currency getCurrency(final WebDriver htmlPage) {
 
         String currency = "";
         try {
@@ -115,11 +115,13 @@ public class FlatParser extends Parser {
 
         if (currency.contains("$"))
             return Currency.getInstance("USD");
+        else if(currency.contains("p") || currency.contains("р")) //the second p is in Russian
+            return Currency.getInstance("RUB");
 
         return null;
     }
 
-    public static String getFlatTitle(WebDriver htmlPage) {
+    public static String getFlatTitle(final WebDriver htmlPage) {
         String title = "";
         try {
             title = getFeature(htmlPage, TITLE_EXPRESSION);
@@ -130,7 +132,7 @@ public class FlatParser extends Parser {
         return removeSkipSymbols(title);
     }
 
-    public static String getListing(WebDriver htmlPage, String expression) {
+    private static String getListing(final WebDriver htmlPage, final String expression) {
         final String[] listing = getFeatures(htmlPage, LISTING_EXPRESSION);
 
         for (String currentListing : listing) {
@@ -142,30 +144,30 @@ public class FlatParser extends Parser {
         return "";
     }
 
-    public static int getQuantityBedrooms(WebDriver htmlPage) {
+    public static int getQuantityBedrooms(final WebDriver htmlPage) {
         return getNumber(getListing(htmlPage, "Bedrooms:"));
     }
 
-    public static int getQuantityBathrooms(WebDriver htmlPage) {
+    public static int getQuantityBathrooms(final WebDriver htmlPage) {
         return getNumber(getListing(htmlPage, "Bathrooms:"));
     }
 
-    public static int getQuantityBeds(WebDriver htmlPage) {
+    public static int getQuantityBeds(final WebDriver htmlPage) {
         return getNumber(getListing(htmlPage, "Beds:"));
     }
 
-    public static int getQuantityAccommodates(WebDriver htmlPage) {
+    public static int getQuantityAccommodates(final WebDriver htmlPage) {
         return getNumber(getListing(htmlPage,"Accommodates:"));
     }
 
-    public static PropertyType getPropertyType(WebDriver htmlPage) {
+    public static PropertyType getPropertyType(final WebDriver htmlPage) {
         return PropertyType.getPropertyType(getListing(htmlPage, "Property type:").replaceAll("Property type: ", ""));
     }
 
-    public static int getId(WebDriver htmlPage) {
+    public static int getId(final WebDriver htmlPage) {
         String id = null;
         try {
-            id = getFeature(htmlPage, ID_EXPRESSION, "@value");
+            id = getFeature(htmlPage, ID_EXPRESSION, "value");
         } catch (TooManyAreasException | NoAreasException e) {
             logger.debug(e.getMessage() + " id");
         }
@@ -173,7 +175,7 @@ public class FlatParser extends Parser {
         return getNumber(id);
     }
 
-    public static int getCountReviews(WebDriver htmlPage) {
+    public static int getCountReviews(final WebDriver htmlPage) {
         String result = "";
 
         try {
@@ -188,13 +190,13 @@ public class FlatParser extends Parser {
     }
 
     public static int getRating(WebDriver htmlPage) {
-        int countStars = countFeatures(htmlPage, COUNT_RATING_EXPRESSION + "/i[@class='icon icon-pink icon-beach icon-star']");
-        int countHalfStars = countFeatures(htmlPage, COUNT_RATING_EXPRESSION + "/i[@class='icon icon-pink icon-beach icon-star-half']");
+        final int countStars = countFeatures(htmlPage, COUNT_RATING_EXPRESSION + "/i[@class='icon icon-pink icon-beach icon-star']");
+        final int countHalfStars = countFeatures(htmlPage, COUNT_RATING_EXPRESSION + "/i[@class='icon icon-pink icon-beach icon-star-half']");
         return 2 * countStars + countHalfStars;
     }
 
-    private static void setAmenities(String[] amenities, Flat.FlatBuilder builder) {
-        HashSet<String> amenitiesSet = new HashSet<>();
+    private static void setAmenities(final String[] amenities,final Flat.FlatBuilder builder) {
+        final HashSet<String> amenitiesSet = new HashSet<>();
         for (String currentAmenities : amenities)
             amenitiesSet.add(currentAmenities.toLowerCase());
 
@@ -261,8 +263,8 @@ public class FlatParser extends Parser {
 
     }
 
-    private  static void setLocation(WebDriver htmlPage, Flat.FlatBuilder builder) {
-        String location = getLocation(htmlPage);
+    private  static void setLocation(final WebDriver htmlPage, final Flat.FlatBuilder builder) {
+        final String location = getLocation(htmlPage);
 
         if(location.equals(""))
             return;
@@ -284,8 +286,28 @@ public class FlatParser extends Parser {
 
     }
 
-    public List<Integer> getUserIdsFromComments(WebDriver htmlPage) {
-        return getIds(htmlPage, USER_IDS_EXPRESSION, "@href");
+    public static List<Integer> getUserIdsFromComments(final WebDriver htmlPage) {
+
+        final List<Integer> result = new ArrayList<>();
+
+
+        String[] userIds;
+        do {
+            userIds = getFeatures(htmlPage, USER_IDS_EXPRESSION, "href");
+            for (String currentUserId : userIds)
+                result.add(getNumber(currentUserId));
+            try {
+                WebElement nextPage = htmlPage.findElement(By.xpath(LOAD_MORE_COMMENTS));
+                nextPage.click();
+            } catch (org.openqa.selenium.NoSuchElementException e) {
+                break;
+            }catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        } while (true);
+
+        return result;
     }
 
 }

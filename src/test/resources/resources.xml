@@ -3,23 +3,22 @@
 
     <samples>
         <flats>
-            <name>Flat1</name>
-            <name>Flat2</name>
-            <name>Flat3</name>
+            <name>https://www.airbnb.com/rooms/1327090</name>
+            <name>https://www.airbnb.com/rooms/2058080</name>
+            <name>https://www.airbnb.com/rooms/3722745</name>
         </flats>
 
         <userflats>
-            <name>UserFlats1</name>
-            <name>UserFlats2</name>
-            <name>UserFlats3</name>
-            <name>UserFlats4</name>
+            <name>https://www.airbnb.com/s?host_id=561814</name>
+            <name>https://www.airbnb.com/s?host_id=16035019</name>
+            <name>https://www.airbnb.com/s?host_id=552658</name>
         </userflats>
 
         <users>
-            <name>User1</name>
-            <name>User2</name>
-            <name>User3</name>
-            <name>User4</name>
+            <name>https://www.airbnb.com/users/show/200</name>
+            <name>https://www.airbnb.com/users/show/1</name>
+            <name>https://www.airbnb.com/users/show/1446883</name>
+            <name>https://www.airbnb.com/users/show/13957080</name>
         </users>
     </samples>
 
@@ -37,7 +36,7 @@
                 <quantitybeds>2</quantitybeds>
                 <quantitybathrooms>1</quantitybathrooms>
                 <quantitybedrooms>2</quantitybedrooms>
-                <currency>USD</currency>
+                <currency>RUB</currency>
             </flat>
 
             <flat>
@@ -45,13 +44,13 @@
                 <id>2058080</id>
                 <pricepernight>129</pricepernight>
                 <quantityaccommodates>7</quantityaccommodates>
-                <countreviews>33</countreviews>
+                <countreviews>37</countreviews>
                 <rating>10</rating>
                 <Propertytype>Apartment</Propertytype>
                 <quantitybeds>4</quantitybeds>
                 <quantitybathrooms>3</quantitybathrooms>
                 <quantitybedrooms>3</quantitybedrooms>
-                <currency>USD</currency>
+                <currency>RUB</currency>
             </flat>
 
             <flat>
@@ -65,7 +64,7 @@
                 <quantitybeds>3</quantitybeds>
                 <quantitybathrooms>1</quantitybathrooms>
                 <quantitybedrooms>1</quantitybedrooms>
-                <currency>USD</currency>
+                <currency>RUB</currency>
             </flat>
 
         </flats>

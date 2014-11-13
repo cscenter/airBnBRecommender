@@ -1,7 +1,6 @@
 import exceptions.IncorrectQuantityTests;
 import org.apache.log4j.Logger;
 import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.TagNode;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
@@ -9,12 +8,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 import ru.cscenter.practice.recsys.FlatParser;
 
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -23,34 +18,26 @@ public class FlatParserTests {
     private static final Logger logger = Logger.getLogger(FlatParser.class.getName());
     private static final FlatParser parser = new FlatParser();
     private static final HtmlCleaner htmlCleaner = new HtmlCleaner();
-    //private WebDriver webDriver = new FirefoxDriver(new DesiredCapabilities());
+    private final  WebDriver webDriver = new FirefoxDriver(new DesiredCapabilities());
 
-    public boolean doTest(final String objectName, final String methodName) throws IncorrectQuantityTests{
+    public boolean doTest(final String objectName, final String methodName) throws IncorrectQuantityTests {
 
         try {
 
-            Method method = parser.getClass().getMethod(methodName, TagNode.class);
+            Method method = parser.getClass().getMethod(methodName, WebDriver.class);
 
             final String[] answers = HtmlResource.getAnswers(objectName, methodName);
-            final List<File> htmlObjects = HtmlResource.getSample(objectName);
+            final List<String> addressesOfObjects = HtmlResource.getSample(objectName);
 
-            if(answers.length != htmlObjects.size()) {
-                throw new IncorrectQuantityTests("Quantity of html objects and answers don't match " + answers.length + " " + htmlObjects.size());
+            if (answers.length != addressesOfObjects.size()) {
+                throw new IncorrectQuantityTests("Quantity of html objects and answers don't match " + answers.length + " " + addressesOfObjects.size());
             }
-
-            try {
-                int flatIdposition = 0;
-                for (File currentPage : htmlObjects ) {
-                    if(!method.invoke(parser, htmlCleaner.clean(currentPage)).toString().equals(answers[flatIdposition++]))
-                        return false;
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-                logger.debug(e.getMessage());
-                return false;
+            int flatIdposition = 0;
+            for (String currentPage : addressesOfObjects) {
+                webDriver.get(currentPage);
+                if (!method.invoke(parser, webDriver).toString().equals(answers[flatIdposition++]))
+                    return false;
             }
-
 
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
@@ -79,22 +66,22 @@ public class FlatParserTests {
 
     @Test
     public void getCountReviewsTest() throws IncorrectQuantityTests {
-        Assert.assertEquals(doTest("flat","getCountReviews"),true);
+        Assert.assertEquals(doTest("flat", "getCountReviews"), true);
     }
 
     @Test
     public void getRating() throws IncorrectQuantityTests {
-        Assert.assertEquals(doTest("flat","getRating"),true);
+        Assert.assertEquals(doTest("flat", "getRating"), true);
     }
 
     @Test
     public void getPropertyType() throws IncorrectQuantityTests {
-        Assert.assertEquals(doTest("flat","getPropertyType"), true);
+        Assert.assertEquals(doTest("flat", "getPropertyType"), true);
     }
 
     @Test
-    public void getQuantityBedsTest() throws  IncorrectQuantityTests {
-        Assert.assertEquals(doTest("flat","getQuantityBeds"),true);
+    public void getQuantityBedsTest() throws IncorrectQuantityTests {
+        Assert.assertEquals(doTest("flat", "getQuantityBeds"), true);
     }
 
     @Test

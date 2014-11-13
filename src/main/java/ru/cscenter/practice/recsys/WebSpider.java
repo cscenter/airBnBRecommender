@@ -32,8 +32,12 @@ public class WebSpider {
         final FlatParser flatParser = new FlatParser();
         final UserParser userParser = new UserParser();
         final FlatPageParser flatPageParser = new FlatPageParser();
+        List<Integer> usersFromComments;
+        List<Integer> listiningsOfHostUser;
+        List<Integer> usersFromFlatComments;
 
         int countFlats = 0, countUsers = 0;
+        boolean hasFlats;
 
         try (DatabaseConnect connection = new DatabaseConnect()) {
             while (countFlats < quantityFlats || countUsers < quantityUsers) {
@@ -55,21 +59,24 @@ public class WebSpider {
 
                 webDriver.get(USER_ADDRESS + currentHostUser.fst());
                 final User newUser = userParser.parse(webDriver);
+                usersFromComments = UserParser.getUserHostIdsFromComments(webDriver);
+                hasFlats = UserParser.hasFlats(webDriver);
 
-                if (currentHostUser.fst() != newUser.getId() || newUser.getId() == 0) {
+
+                if ((newUser.getId() == 0) ||
+                        ((usersFromComments.size() == 0) && !hasFlats && (currentHostUser.snd == -1))) {
                     continue;
                 }
 
                 connection.putUserIntoDatabase(newUser);
                 ++countUsers;
-
-
-                final List<Integer> usersFromComments = UserParser.getUserHostIdsFromComments(webDriver);
                 usersQueue.addAll(makeArrayOfPair(usersFromComments, -1));
 
-                if(UserParser.hasFlats(webDriver)) {
+
+
+                if(hasFlats) {
                     webDriver.get(FLATS_OF_USER_EXPRESSION + currentHostUser.fst);
-                    final List<Integer> listiningsOfHostUser = flatPageParser.parse(webDriver);
+                    listiningsOfHostUser = flatPageParser.parse(webDriver);
 
                     for (Integer currentFlatId : listiningsOfHostUser) {
                         if (connection.containsFlat(currentFlatId)) {
@@ -81,14 +88,14 @@ public class WebSpider {
                         webDriver.get(FLAT_ADDRESS + currentFlatId);
                         final Flat flat = flatParser.parse(webDriver);
 
-                        if (flat.getId() != currentFlatId || flat.getId() == 0) {
+                        if (flat.getId() == 0) {
                             continue;
                         }
 
                         connection.putFlatIntoDatabase(flat);
                         ++countFlats;
 
-                        final List<Integer> usersFromFlatComments = flatParser.getUserIdsFromComments(webDriver);
+                        usersFromFlatComments = flatParser.getUserIdsFromComments(webDriver);
                         usersQueue.addAll(makeArrayOfPair(usersFromFlatComments, currentFlatId));
                     }
                 }

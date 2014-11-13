@@ -11,8 +11,13 @@
     </appender>
 
     <root>
-        <level value="DEBUG" />
+        <level value="WARNING" />
         <appender-ref ref="console" />
     </root>
+
+    <logger name="org" additivity="true">
+        <level value="WARNING"/>
+        <appender-ref ref="console" />
+    </logger>
 
 </log4j:configuration>

@@ -6,7 +6,7 @@ public class Language {
 
     private final String lang;
 
-    private static ArrayList<Language> instances = new ArrayList<>();
+    private final static ArrayList<Language> instances = new ArrayList<>();
 
     private Language(final String lang) {
         this.lang = lang;

@@ -1,7 +1,10 @@
 package ru.cscenter.practice.recsys;
 
 import org.apache.log4j.Logger;
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import ru.cscenter.practice.recsys.exceptions.NoAreasException;
 import ru.cscenter.practice.recsys.exceptions.TooManyAreasException;
 
@@ -12,13 +15,15 @@ import java.util.List;
 public class UserParser extends Parser {
     private static final String ID_EXPRESSION = "//div[@class='user-profile-symbol loading']";
     private static final String LANGUAGE_EXPRESSION = "//div[@class='panel row-space-4']//dl/*";
-    private static final String USER_IDS_EXPRESSION = "//div[@class='reviews_section as_guest row-space-top-3']/" +
+    private static final String USERHOST_IDS_EXPRESSION = "//div[@class='reviews_section as_guest row-space-top-3']/" +
             "div[@class='reviews']/div[@class = 'row']/div[@class = 'col-2']/div[@class = 'pull-right']/a";
 
     private static final String FLAT_IDS_EXPRESSION = "//div[@class = 'listings row-space-2 row-space-top-4']/" +
             "ul[@class = 'hostings-list list-layout']/li[@class='row-space-2']/a";
 
-    private static final String COUNT_REVIEWS_FROM_HOST = "//div[@id='reviews']/h2/small";
+    private static final String COUNT_REVIEWS_FROM_HOST_EXPRESSION = "//div[@id = 'reviews']/h2/small";
+    private static final String LOAD_MORE_EXPRESSION =
+            "//div[@class = 'reviews_section as_guest row-space-top-3']//a[@class = 'load_more']";
 
     private static final Logger logger = Logger.getLogger(UserParser.class.getName());
 
@@ -33,7 +38,7 @@ public class UserParser extends Parser {
 
         String id = null;
         try {
-            id = getFeature(htmlPage, ID_EXPRESSION, "@data-user-id");
+            id = getFeature(htmlPage, ID_EXPRESSION, "data-user-id");
         } catch (TooManyAreasException | NoAreasException e) {
             logger.debug(e.getMessage() + " user id");
         }
@@ -69,21 +74,40 @@ public class UserParser extends Parser {
         String review = null;
 
         try {
-            review = getFeature(htmlPage, COUNT_REVIEWS_FROM_HOST);
+            review = getFeature(htmlPage, COUNT_REVIEWS_FROM_HOST_EXPRESSION);
         } catch (TooManyAreasException e) {
             logger.debug(e.getMessage() + " countReviewsfromHost");
         } catch (NoAreasException e) {
-            // ignore, because exist users without riviews from host
+            // ignore, because exist users without reviews from host
         }
 
         return getNumber(review);
     }
 
     public static List<Integer> getUserHostIdsFromComments(final WebDriver htmlPage) {
-        return getIds(htmlPage, USER_IDS_EXPRESSION, "@href");
+
+        final ArrayList<Integer> result = new ArrayList<>();
+
+        String[] userIds;
+        do {
+            try {
+                WebElement loadMore = htmlPage.findElement(By.xpath(LOAD_MORE_EXPRESSION));
+                loadMore.click();
+            } catch (Exception e) {
+                break;
+            }
+
+        } while (true);
+
+        userIds = getFeatures(htmlPage,  USERHOST_IDS_EXPRESSION, "href");
+        for (String currentUserId : userIds)
+            result.add(getNumber(currentUserId));
+
+        return result;
+
     }
 
     public static boolean hasFlats(final WebDriver htmlPage) {
-        return getIds(htmlPage, FLAT_IDS_EXPRESSION, "@href").size() > 0;
+        return getFeatures(htmlPage, FLAT_IDS_EXPRESSION, "href").length > 0;
     }
 }
