@@ -1,10 +1,7 @@
 package ru.cscenter.practice.recsys;
 
 import org.apache.log4j.Logger;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import ru.cscenter.practice.recsys.exceptions.NoAreasException;
 import ru.cscenter.practice.recsys.exceptions.TooManyAreasException;
 
@@ -13,7 +10,7 @@ import java.util.List;
 
 
 public class UserParser extends Parser {
-    private static final String ID_EXPRESSION = "//div[@class='user-profile-symbol loading']";
+    private static final String ID_EXPRESSION = "//div[@class='user-profile-symbol']";
     private static final String LANGUAGE_EXPRESSION = "//div[@class='panel row-space-4']//dl/*";
     private static final String USERHOST_IDS_EXPRESSION = "//div[@class='reviews_section as_guest row-space-top-3']/" +
             "div[@class='reviews']/div[@class = 'row']/div[@class = 'col-2']/div[@class = 'pull-right']/a";
@@ -22,7 +19,7 @@ public class UserParser extends Parser {
             "ul[@class = 'hostings-list list-layout']/li[@class='row-space-2']/a";
 
     private static final String COUNT_REVIEWS_FROM_HOST_EXPRESSION = "//div[@id = 'reviews']/h2/small";
-    private static final String LOAD_MORE_EXPRESSION =
+    private static final String LOAD_MORE_COMMENTS =
             "//div[@class = 'reviews_section as_guest row-space-top-3']//a[@class = 'load_more']";
 
     private static final Logger logger = Logger.getLogger(UserParser.class.getName());
@@ -34,7 +31,7 @@ public class UserParser extends Parser {
         return new User(getId(htmlPage), getLanguages(htmlPage), getCountReviewsFromHost(htmlPage));
     }
 
-    public  static int getId(final WebDriver htmlPage) {
+    public static int getId(final WebDriver htmlPage) {
 
         String id = null;
         try {
@@ -47,27 +44,27 @@ public class UserParser extends Parser {
         return getNumber(id);
     }
 
-    public static Language[] getLanguages(final WebDriver htmlPage) {
-        final String[] pretendersToBeLanguage = getFeatures(htmlPage, LANGUAGE_EXPRESSION);
+    public static List<Language> getLanguages(final WebDriver htmlPage) {
+        final List<String> pretendersToBeLanguage = getFeatures(htmlPage, LANGUAGE_EXPRESSION);
         final ArrayList<Language> resultLanguages = new ArrayList<>();
 
         int numberOfStringWithLanguages = -1;
 
-        for (int i = 0; i < pretendersToBeLanguage.length; ++i) {
-            if(pretendersToBeLanguage[i].contains("Languages")) {
+        for (int i = 0; i < pretendersToBeLanguage.size(); ++i) {
+            if (pretendersToBeLanguage.get(i).contains("Languages")) {
                 numberOfStringWithLanguages = i + 1;
                 break;
             }
         }
 
-        if(numberOfStringWithLanguages != -1) {
+        if (numberOfStringWithLanguages != -1) {
 
-            final String[] languages = pretendersToBeLanguage[numberOfStringWithLanguages].split(",");
-            for(String currLanguage : languages)
+            final String[] languages = pretendersToBeLanguage.get(numberOfStringWithLanguages).split(",");
+            for (String currLanguage : languages)
                 resultLanguages.add(Language.getInstance(removeSkipSymbols(currLanguage)));
         }
 
-        return resultLanguages.toArray(new Language[resultLanguages.size()]);
+        return resultLanguages;
     }
 
     public static int getCountReviewsFromHost(final WebDriver htmlPage) {
@@ -88,18 +85,10 @@ public class UserParser extends Parser {
 
         final ArrayList<Integer> result = new ArrayList<>();
 
-        String[] userIds;
-        do {
-            try {
-                WebElement loadMore = htmlPage.findElement(By.xpath(LOAD_MORE_EXPRESSION));
-                loadMore.click();
-            } catch (Exception e) {
-                break;
-            }
+        List<String> userIds;
+        while (Parser.clickAndWait(htmlPage, LOAD_MORE_COMMENTS)) ;
 
-        } while (true);
-
-        userIds = getFeatures(htmlPage,  USERHOST_IDS_EXPRESSION, "href");
+        userIds = getFeatures(htmlPage, USERHOST_IDS_EXPRESSION, "href");
         for (String currentUserId : userIds)
             result.add(getNumber(currentUserId));
 
@@ -108,6 +97,6 @@ public class UserParser extends Parser {
     }
 
     public static boolean hasFlats(final WebDriver htmlPage) {
-        return getFeatures(htmlPage, FLAT_IDS_EXPRESSION, "href").length > 0;
+        return getFeatures(htmlPage, FLAT_IDS_EXPRESSION, "href").size() > 0;
     }
 }

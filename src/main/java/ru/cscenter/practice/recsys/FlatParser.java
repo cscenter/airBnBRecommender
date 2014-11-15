@@ -10,7 +10,7 @@ import java.util.*;
 
 public class FlatParser extends Parser {
 
-    private static final String AMENITIES_EXPRESSION = "//div[@class='row row-condensed row-table row-space-1']/div[@class='col-10 col-middle']/span";
+    private static final String AMENITIES_EXPRESSION = "//div[@class='expandable-content-full']//div[@class='col-10 col-middle']/span[strong]";
     private static final String DESCRIPTION_EXPRESSION = "//div[@class='expandable-content expandable-content-long']";
     private static final String LOCATION_EXPRESSION = "//a[@href='#neighborhood'][@class='link-reset']";
     private static final String PRICE_EXPRESSION = "//div[@id = 'price_amount']";
@@ -27,9 +27,12 @@ public class FlatParser extends Parser {
                     + "/h4[@class='row-space-4']/div[@class='star-rating']/div[@class = 'foreground']";
 
     private static final String LOAD_MORE_COMMENTS = "//li[@class='next next_page']/a";
+    private static final String LOAD_AMENITIES = "//div[@class='expandable-content-summary']//a[@class='expandable-trigger-more']";
     private static final Logger logger = Logger.getLogger(FlatParser.class.getName());
 
-    public FlatParser() {}
+
+    public FlatParser() {
+    }
 
     public Flat parse(final WebDriver htmlPage) {
 
@@ -41,7 +44,7 @@ public class FlatParser extends Parser {
         Flat.FlatBuilder flatBuilder = new Flat.FlatBuilder();
 
         setAmenities(getAmenities(htmlPage), flatBuilder);
-        setLocation(htmlPage,flatBuilder);
+        setLocation(htmlPage, flatBuilder);
 
         flatBuilder.setDescription(getDescription(htmlPage));
         flatBuilder.setPricePerNight(getPricePerNight(htmlPage));
@@ -60,11 +63,14 @@ public class FlatParser extends Parser {
 
     }
 
-    public static String[] getAmenities(final WebDriver htmlPage) {
-        final String[] result = getFeatures(htmlPage, AMENITIES_EXPRESSION);
+    public static List<String> getAmenities(final WebDriver htmlPage) {
+        clickAndWait(htmlPage, LOAD_AMENITIES);
 
-        for (int i = 0; i < result.length; ++i) {
-            result[i] = removeSkipSymbols(result[i]);
+        List<String> amenities = getFeatures(htmlPage, AMENITIES_EXPRESSION);
+        List<String> result = new ArrayList<>();
+
+        for (String amenity : amenities) {
+            result.add(removeSkipSymbols(amenity));
         }
         return result;
     }
@@ -73,7 +79,7 @@ public class FlatParser extends Parser {
         String description = "";
 
         try {
-            description = removeSkipSymbols(getFeature(htmlPage,DESCRIPTION_EXPRESSION));
+            description = removeSkipSymbols(getFeature(htmlPage, DESCRIPTION_EXPRESSION));
         } catch (NoAreasException | TooManyAreasException e) {
             logger.debug(e.getMessage() + " description");
         }
@@ -115,7 +121,7 @@ public class FlatParser extends Parser {
 
         if (currency.contains("$"))
             return Currency.getInstance("USD");
-        else if(currency.contains("p") || currency.contains("р")) //the second p is in Russian
+        else if (currency.contains("p") || currency.contains("р")) //the second p is in Russian
             return Currency.getInstance("RUB");
 
         return null;
@@ -133,7 +139,7 @@ public class FlatParser extends Parser {
     }
 
     private static String getListing(final WebDriver htmlPage, final String expression) {
-        final String[] listing = getFeatures(htmlPage, LISTING_EXPRESSION);
+        final List<String> listing = getFeatures(htmlPage, LISTING_EXPRESSION);
 
         for (String currentListing : listing) {
             if (removeSkipSymbols(currentListing).contains(expression))
@@ -157,7 +163,7 @@ public class FlatParser extends Parser {
     }
 
     public static int getQuantityAccommodates(final WebDriver htmlPage) {
-        return getNumber(getListing(htmlPage,"Accommodates:"));
+        return getNumber(getListing(htmlPage, "Accommodates:"));
     }
 
     public static PropertyType getPropertyType(final WebDriver htmlPage) {
@@ -183,7 +189,7 @@ public class FlatParser extends Parser {
         } catch (TooManyAreasException e) {
             logger.debug(e.getMessage() + " count review");
         } catch (NoAreasException e) {
-             // ignore because exist flats without reviews
+            // ignore because exist flats without reviews
         }
 
         return getNumber(result);
@@ -195,7 +201,7 @@ public class FlatParser extends Parser {
         return 2 * countStars + countHalfStars;
     }
 
-    private static void setAmenities(final String[] amenities,final Flat.FlatBuilder builder) {
+    private static void setAmenities(final List<String> amenities, final Flat.FlatBuilder builder) {
         final HashSet<String> amenitiesSet = new HashSet<>();
         for (String currentAmenities : amenities)
             amenitiesSet.add(currentAmenities.toLowerCase());
@@ -263,25 +269,23 @@ public class FlatParser extends Parser {
 
     }
 
-    private  static void setLocation(final WebDriver htmlPage, final Flat.FlatBuilder builder) {
+    private static void setLocation(final WebDriver htmlPage, final Flat.FlatBuilder builder) {
         final String location = getLocation(htmlPage);
 
-        if(location.equals(""))
+        if (location.equals(""))
             return;
 
-        String[] locationParts = location.split(",");
+        List<String> locationParts = Arrays.asList(location.split(","));
 
-        if(locationParts.length == 3) {
-            builder.setCity(removeSkipSymbols(locationParts[0]));
-            builder.setDistrict(removeSkipSymbols(locationParts[1]));
-            builder.setCountry(removeSkipSymbols(locationParts[2]));
-        }
-        else if(locationParts.length == 2) {
-            builder.setDistrict(removeSkipSymbols(locationParts[0]));
-            builder.setCountry(removeSkipSymbols(locationParts[1]));
-        }
-        else{
-            builder.setCountry(removeSkipSymbols(locationParts[0]));
+        if (locationParts.size() == 3) {
+            builder.setCity(removeSkipSymbols(locationParts.get(0)));
+            builder.setDistrict(removeSkipSymbols(locationParts.get(1)));
+            builder.setCountry(removeSkipSymbols(locationParts.get(2)));
+        } else if (locationParts.size() == 2) {
+            builder.setDistrict(removeSkipSymbols(locationParts.get(0)));
+            builder.setCountry(removeSkipSymbols(locationParts.get(1)));
+        } else {
+            builder.setCountry(removeSkipSymbols(locationParts.get(1)));
         }
 
     }
@@ -290,22 +294,12 @@ public class FlatParser extends Parser {
 
         final List<Integer> result = new ArrayList<>();
 
-
-        String[] userIds;
+        List<String> userIds;
         do {
             userIds = getFeatures(htmlPage, USER_IDS_EXPRESSION, "href");
             for (String currentUserId : userIds)
                 result.add(getNumber(currentUserId));
-            try {
-                WebElement nextPage = htmlPage.findElement(By.xpath(LOAD_MORE_COMMENTS));
-                nextPage.click();
-            } catch (org.openqa.selenium.NoSuchElementException e) {
-                break;
-            }catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        } while (true);
+        } while (Parser.clickAndWait(htmlPage, LOAD_MORE_COMMENTS));
 
         return result;
     }

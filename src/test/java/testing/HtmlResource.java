@@ -1,10 +1,9 @@
+package testing;
+
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.htmlcleaner.XPatherException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
-import ru.cscenter.practice.recsys.Parser;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 
-public class HtmlResource {
+class HtmlResource {
 
     private HtmlResource() {
     }

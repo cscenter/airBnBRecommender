@@ -1,14 +1,13 @@
 package ru.cscenter.practice.recsys;
 
 import org.apache.log4j.Logger;
-import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.TagNode;
 import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
-import java.net.URL;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class WebSpider {
     private static final String FLAT_ADDRESS = "https://www.airbnb.com/rooms/";
@@ -73,8 +72,7 @@ public class WebSpider {
                 usersQueue.addAll(makeArrayOfPair(usersFromComments, -1));
 
 
-
-                if(hasFlats) {
+                if (hasFlats) {
                     webDriver.get(FLATS_OF_USER_EXPRESSION + currentHostUser.fst);
                     listiningsOfHostUser = flatPageParser.parse(webDriver);
 

@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 import java.lang.reflect.Field;
 import java.sql.*;
 
-public class DatabaseConnect implements AutoCloseable {
+class DatabaseConnect implements AutoCloseable {
 
     private static final String DB_URL = "jdbc:mysql://localhost/recommendersystemdb";
     private static final String USER = "hostuser";
@@ -81,7 +81,7 @@ public class DatabaseConnect implements AutoCloseable {
 
         boolean result = putLanguagesOfUser(user);
 
-        if(!result)
+        if (!result)
             return false;
 
         try (PreparedStatement request = connection.prepareStatement("insert into users value(?,?)")) {
@@ -104,7 +104,7 @@ public class DatabaseConnect implements AutoCloseable {
         try (PreparedStatement request = connection.prepareStatement("insert into visitedflats value(?,?)")) {
             request.setInt(1, userId);
             request.setInt(2, flatId);
-            result =  request.execute();
+            result = request.execute();
         } catch (SQLException e) {
             logger.debug(e.getMessage() + " userId: " + userId + " flatId: " + flatId);
         }
@@ -117,10 +117,10 @@ public class DatabaseConnect implements AutoCloseable {
 
         try (PreparedStatement request = connection.prepareStatement("insert into languagesOfUser value(?,?)")) {
             request.setInt(1, user.getId());
-            for(Language language : user.getLanguages()) {
+            for (Language language : user.getLanguages()) {
 
                 int languageId = getLanguageId(language.getLanguage());
-                if(languageId == -1) continue;
+                if (languageId == -1) continue;
 
                 request.setInt(2, languageId);
                 result += request.execute() ? 1 : 0;
@@ -129,24 +129,23 @@ public class DatabaseConnect implements AutoCloseable {
             logger.debug(e.getMessage() + " userId: " + user.getId());
         }
 
-        return result == user.getLanguages().length;
+        return result == user.getLanguages().size();
     }
 
     private int getLanguageId(final String language) {
 
-        try(PreparedStatement request = connection.prepareStatement("select id from language where value = ?")) {
+        try (PreparedStatement request = connection.prepareStatement("select id from language where value = ?")) {
             request.setString(1, language);
-            ResultSet result =  request.executeQuery();
+            ResultSet result = request.executeQuery();
 
-            if(!result.next())
+            if (!result.next())
                 putLanguage(language);
             else
                 return result.getInt("id");
 
             result = request.executeQuery();
             return result.next() ? result.getInt("id") : -1;
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             logger.debug(e.getMessage() + language);
         }
 
@@ -155,11 +154,10 @@ public class DatabaseConnect implements AutoCloseable {
 
     private boolean putLanguage(final String language) {
 
-        try(PreparedStatement request = connection.prepareStatement("insert into language(value) value (?)")) {
+        try (PreparedStatement request = connection.prepareStatement("insert into language(value) value (?)")) {
             request.setString(1, language);
             return request.execute();
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             logger.debug(e.getMessage() + language);
         }
         return false;
@@ -172,7 +170,7 @@ public class DatabaseConnect implements AutoCloseable {
         try (PreparedStatement request = connection.prepareStatement("select id from " + table + " where id = ?")) {
             request.setInt(1, id);
             ResultSet resultSet = request.executeQuery();
-            result =  resultSet.next();
+            result = resultSet.next();
         } catch (SQLException e) {
             logger.debug(e.getMessage() + " " + table + " Id: " + id);
         }

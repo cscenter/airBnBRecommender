@@ -1,33 +1,32 @@
 package ru.cscenter.practice.recsys;
 
-import org.apache.log4j.BasicConfigurator;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.remote.DesiredCapabilities;
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import org.apache.commons.logging.LogFactory;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 public class TestProgram {
 
     public static void main(String[] args) throws IOException {
-        //BasicConfigurator.configure();
 
-        DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setJavascriptEnabled(true);
+        LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
 
-        WebDriver dr = new FirefoxDriver();
-        //dr.manage().timeouts().setScriptTimeout(15, TimeUnit.SECONDS);
-        //dr.get("https://www.airbnb.com/s?host_id=561814");
+        java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.WARNING);
+        java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.WARNING);
 
-        //FlatParser.getUserIdsFromComments(dr);
-        //UserParser.getUserHostIdsFromComments(dr);
-        //List<Integer> a = new FlatPageParser().parse(dr);
+        HtmlUnitDriver htmlUnitDriver = new HtmlUnitDriver(BrowserVersion.FIREFOX_24);
+        htmlUnitDriver.setJavascriptEnabled(true);
+        htmlUnitDriver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+        htmlUnitDriver.manage().timeouts().setScriptTimeout(5, TimeUnit.SECONDS);
+        htmlUnitDriver.manage().timeouts().pageLoadTimeout(5, TimeUnit.SECONDS);
+        htmlUnitDriver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
+        htmlUnitDriver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
 
-        //System.out.println(a.toString());
 
-        WebSpider spider = new WebSpider(new FirefoxDriver(capabilities));
+        WebSpider spider = new WebSpider(htmlUnitDriver);
 
         try {
             spider.DiscoverHostUsersThenFlats(200, 10, 10);

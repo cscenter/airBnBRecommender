@@ -1,10 +1,7 @@
 package ru.cscenter.practice.recsys;
 
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,24 +16,14 @@ public class FlatPageParser extends Parser {
 
     public List<Integer> parse(final WebDriver htmlPage) {
         final List<Integer> result = new ArrayList<>();
-        String[] flatIds;
+        List<String> flatIds;
 
         do {
             flatIds = getFeatures(htmlPage, FLAT_ID_EXPRESSION, "data-id");
-            for(String currentId : flatIds) {
+            for (String currentId : flatIds) {
                 result.add(getNumber(currentId));
             }
-
-            try {
-                WebElement nextPage = htmlPage.findElement(By.xpath(LOAD_MORE_FLATS));
-                nextPage.click();
-            } catch (NoSuchElementException e) {
-                break;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-        }while(true);
+        } while (Parser.clickAndWait(htmlPage, LOAD_MORE_FLATS));
 
         return result;
     }

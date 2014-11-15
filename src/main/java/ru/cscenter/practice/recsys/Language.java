@@ -13,8 +13,8 @@ public class Language {
     }
 
     public static Language getInstance(final String lang) {
-        for(Language currentLanguage : instances) {
-            if(currentLanguage.getLanguage().equals(lang)) {
+        for (Language currentLanguage : instances) {
+            if (currentLanguage.getLanguage().equals(lang)) {
                 return currentLanguage;
             }
         }
@@ -24,6 +24,11 @@ public class Language {
     }
 
     public String getLanguage() {
+        return lang;
+    }
+
+    @Override
+    public String toString() {
         return lang;
     }
 }

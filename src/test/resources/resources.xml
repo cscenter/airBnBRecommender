@@ -8,15 +8,15 @@
             <name>https://www.airbnb.com/rooms/3722745</name>
         </flats>
 
-        <userflats>
+        <flatpages>
             <name>https://www.airbnb.com/s?host_id=561814</name>
             <name>https://www.airbnb.com/s?host_id=16035019</name>
             <name>https://www.airbnb.com/s?host_id=552658</name>
-        </userflats>
+        </flatpages>s>
 
         <users>
             <name>https://www.airbnb.com/users/show/200</name>
-            <name>https://www.airbnb.com/users/show/1</name>
+            <name>https://www.airbnb.com/users/show/690414</name>
             <name>https://www.airbnb.com/users/show/1446883</name>
             <name>https://www.airbnb.com/users/show/13957080</name>
         </users>
@@ -28,21 +28,25 @@
             <flat>
                 <flattitle>Theatre of Dreams - Vienna Loft</flattitle>
                 <id>1327090</id>
-                <pricepernight>80</pricepernight>
+                <pricepernight>3755</pricepernight>
                 <quantityaccommodates>4</quantityaccommodates>
-                <countreviews>70</countreviews>
+                <countreviews>71</countreviews>
                 <rating>9</rating>
                 <Propertytype>Loft</Propertytype>
                 <quantitybeds>2</quantitybeds>
                 <quantitybathrooms>1</quantitybathrooms>
                 <quantitybedrooms>2</quantitybedrooms>
                 <currency>RUB</currency>
+                <location>Vienna, Vienna, Austria</location>
+                <description></description>
+                <useridsfromcomments></useridsfromcomments>
+                <amenities>[Kitchen, Internet, TV, Heating, Washer, Wireless Internet, Cable TV, Family/Kid Friendly, Elevator in Building, Buzzer/Wireless Intercom]</amenities>
             </flat>
 
             <flat>
                 <flattitle>Amazing 3 bed large APT ☛ 2 patios</flattitle>
                 <id>2058080</id>
-                <pricepernight>129</pricepernight>
+                <pricepernight>6056</pricepernight>
                 <quantityaccommodates>7</quantityaccommodates>
                 <countreviews>37</countreviews>
                 <rating>10</rating>
@@ -51,12 +55,16 @@
                 <quantitybathrooms>3</quantitybathrooms>
                 <quantitybedrooms>3</quantitybedrooms>
                 <currency>RUB</currency>
+                <location>Barcelona, Catalonia, Spain</location>
+                <description></description>
+                <useridsfromcomments></useridsfromcomments>
+                <amenities>[Kitchen, Internet, TV, Essentials, Heating, Air Conditioning, Washer, Wireless Internet, Cable TV, Family/Kid Friendly, Suitable for Events, Wheelchair Accessible, Buzzer/Wireless Intercom]</amenities>
             </flat>
 
             <flat>
                 <flattitle>Revy CPH</flattitle>
                 <id>3722745</id>
-                <pricepernight>34</pricepernight>
+                <pricepernight>2433</pricepernight>
                 <quantityaccommodates>3</quantityaccommodates>
                 <countreviews>0</countreviews>
                 <rating>0</rating>
@@ -65,8 +73,62 @@
                 <quantitybathrooms>1</quantitybathrooms>
                 <quantitybedrooms>1</quantitybedrooms>
                 <currency>RUB</currency>
+                <location>København, Denmark</location>
+                <description></description>
+                <useridsfromcomments></useridsfromcomments>
+                <amenities>[Kitchen, Heating, Washer, Dryer, Free Parking on Premises, Wireless Internet, Fire Extinguisher]</amenities>
             </flat>
 
         </flats>
+        <users>
+
+            <user>
+                <id>200</id>
+                <languages>[]</languages>
+                <hasflats>false</hasflats>
+                <userhostidsfromcomments>[]</userhostidsfromcomments>
+                <countreviewsfromhost>0</countreviewsfromhost>
+            </user>
+
+            <user>
+                <id>690414</id>
+                <languages>[Español, Français]</languages>
+                <hasflats>false</hasflats>
+                <userhostidsfromcomments>[7793385, 2524506, 4029350, 14152565, 11934378, 14152565, 5062846, 13809985, 4773121, 5113473, 506219]</userhostidsfromcomments>
+                <countreviewsfromhost>12</countreviewsfromhost>
+            </user>
+
+            <user>
+                <id>1446883</id>
+                <languages>[English, Français, Italiano]</languages>
+                <hasflats>true</hasflats>
+                <userhostidsfromcomments>[1808758]</userhostidsfromcomments>
+                <countreviewsfromhost>69</countreviewsfromhost>
+            </user>
+
+            <user>
+                <id>13957080</id>
+                <languages>[English, Español]</languages>
+                <hasflats>false</hasflats>
+                <userhostidsfromcomments>[288463, 1446883]</userhostidsfromcomments>
+                <countreviewsfromhost>2</countreviewsfromhost>
+            </user>
+
+        </users>
+        <flatpages>
+
+            <flatpage>
+                <parse>[2609811, 4400821, 185107, 165497, 909617, 436405, 3253391, 311464, 108572, 428699, 1278209, 889777, 1514264, 1962377, 2028712, 697761, 2042019, 3735677, 163172, 3838594, 122861, 133344, 227089, 1762248, 108578, 108583]</parse>
+            </flatpage>
+
+            <flatpage>
+                <parse>[]</parse>
+            </flatpage>
+
+            <flatpage>
+                <parse>[1198102, 194998, 106646]</parse>
+            </flatpage>
+
+        </flatpages>
     </answers>
 </resources>
