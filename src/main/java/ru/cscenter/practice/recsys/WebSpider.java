@@ -20,6 +20,7 @@ public class WebSpider {
         this.webDriver = webDriver;
     }
 
+    //TODO: all functions are starting with lowercase
     public void DiscoverHostUsersThenFlats(int globalHostUserId, final int quantityFlats, final int quantityUsers)
             throws IOException {
         if (globalHostUserId <= 0 || quantityFlats < 0 || quantityUsers < 0) {
@@ -38,6 +39,14 @@ public class WebSpider {
         int countFlats = 0, countUsers = 0;
         boolean hasFlats;
 
+        //TODO: На весь парсинг Airbnb один не рвущийся коннект - это супер-оптимизм :) Советую Spring-jdbc
+        //TODO: В этом случае класс Database connect рассыпется на несколько менеджеров для работы с БД:
+        //TODO: FlatManager, UserManager, LanguageManager и каждый их них будет сприговый jdbcTemplate.
+        //TODO: Эти менеджеры только работают с БД посредством jdbcTemplate, но сами не устанавливают коннекты и не закрывают их
+        //TODO: Алгоритм должен быть как можно более устойчивым к падениям ошибок из html,разрывам коннектов с БД
+        //TODO: и разрывам сети. Сейчас работа с БД - это главная уязвимость алгоритма: коннект рвется и все накрывается.
+        //TODO: Если что-то не получается сделать для текущего юзера и вылетает экспшн - ловим, обрабтываем и переходим
+        //TODO: к следующему. То же самое квартира
         try (DatabaseConnect connection = new DatabaseConnect()) {
             while (countFlats < quantityFlats || countUsers < quantityUsers) {
                 if (usersQueue.size() == 0) {

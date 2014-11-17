@@ -10,6 +10,9 @@ import java.util.List;
 
 public abstract class Parser<T> {
 
+    //TODO: Webdriver сделать полем класса парсер, чтобы не передавать в каждый метод
+    //TODO: А методы будут не статические
+
     public abstract T parse(final WebDriver htmlPage);
 
     public static List<String> getFeatures(final WebDriver htmlPage, final String expression, String attribute) {

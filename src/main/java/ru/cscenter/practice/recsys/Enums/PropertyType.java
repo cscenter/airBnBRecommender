@@ -1,5 +1,5 @@
 package ru.cscenter.practice.recsys.enums;
-
+//TODO: rename package Enums to enums
 
 public enum PropertyType {
     APARTMENT("Apartment"),

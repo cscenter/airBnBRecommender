@@ -6,6 +6,10 @@ import org.apache.log4j.Logger;
 import java.lang.reflect.Field;
 import java.sql.*;
 
+//TODO: I strongly advice you use Spring-jdbc to work with database. (У тебя есть один коннект к базе данных на localhost,
+//TODO и он скорее всего не порвется, но что если БД на другой машине? В этом случае обрыв обязательно произойдет
+//TODO и парсер до конца работы будет кидать исключения. И еще если приложение многпоточное,
+//TODO то 1 коннеект на много потоков - это мало. Spring jdbc решит эти проблемы
 class DatabaseConnect implements AutoCloseable {
 
     private static final String DB_URL = "jdbc:mysql://localhost/recommendersystemdb";
