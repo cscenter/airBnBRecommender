@@ -24,18 +24,20 @@ public class UserParser extends Parser {
 
     private static final Logger logger = Logger.getLogger(UserParser.class.getName());
 
-    public User parse(final WebDriver htmlPage) {
-        if (htmlPage == null) {
-            throw new IllegalArgumentException("html page can't be null");
-        }
-        return new User(getId(htmlPage), getLanguages(htmlPage), getCountReviewsFromHost(htmlPage));
+    public UserParser(WebDriver htmlPage) {
+        super(htmlPage);
     }
 
-    public static int getId(final WebDriver htmlPage) {
+    public User parse() {
+        return new User(getId(), getLanguages(), getCountReviewsFromHost());
+    }
+
+    public int getId() {
 
         String id = null;
         try {
-            id = getFeature(htmlPage, ID_EXPRESSION, "data-user-id");
+            id = getFeature(ID_EXPRESSION, "data-user-id");
+            logger.debug("got user id: " + id);
         } catch (TooManyAreasException | NoAreasException e) {
             logger.debug(e.getMessage() + " user id");
         }
@@ -44,8 +46,8 @@ public class UserParser extends Parser {
         return getNumber(id);
     }
 
-    public static List<Language> getLanguages(final WebDriver htmlPage) {
-        final List<String> pretendersToBeLanguage = getFeatures(htmlPage, LANGUAGE_EXPRESSION);
+    public List<Language> getLanguages() {
+        final List<String> pretendersToBeLanguage = getFeatures(LANGUAGE_EXPRESSION);
         final ArrayList<Language> resultLanguages = new ArrayList<>();
 
         int numberOfStringWithLanguages = -1;
@@ -64,39 +66,47 @@ public class UserParser extends Parser {
                 resultLanguages.add(Language.getInstance(removeSkipSymbols(currLanguage)));
         }
 
+        logger.debug("got languages: " + resultLanguages.toString());
+
         return resultLanguages;
     }
 
-    public static int getCountReviewsFromHost(final WebDriver htmlPage) {
+    public int getCountReviewsFromHost() {
         String review = null;
 
         try {
-            review = getFeature(htmlPage, COUNT_REVIEWS_FROM_HOST_EXPRESSION);
+            review = getFeature(COUNT_REVIEWS_FROM_HOST_EXPRESSION);
         } catch (TooManyAreasException e) {
             logger.debug(e.getMessage() + " countReviewsfromHost");
         } catch (NoAreasException e) {
             // ignore, because exist users without reviews from host
         }
 
+        logger.debug("got count reviews: " + review);
+
         return getNumber(review);
     }
 
-    public static List<Integer> getUserHostIdsFromComments(final WebDriver htmlPage) {
+    public List<Integer> getUserHostIdsFromComments() {
 
         final ArrayList<Integer> result = new ArrayList<>();
 
         List<String> userIds;
-        while (Parser.clickAndWait(htmlPage, LOAD_MORE_COMMENTS)) ;
+        while (clickAndWait(LOAD_MORE_COMMENTS)) ;
 
-        userIds = getFeatures(htmlPage, USERHOST_IDS_EXPRESSION, "href");
+        userIds = getFeatures(USERHOST_IDS_EXPRESSION, "href");
         for (String currentUserId : userIds)
             result.add(getNumber(currentUserId));
+
+        logger.debug("got userhostidsfromcomment: " + result.size() + (result.size() > 0 ? " [" + result.get(0) + ", ...]" : ""));
 
         return result;
 
     }
 
-    public static boolean hasFlats(final WebDriver htmlPage) {
-        return getFeatures(htmlPage, FLAT_IDS_EXPRESSION, "href").size() > 0;
+    public boolean hasFlats() {
+        boolean result =  getFeatures(FLAT_IDS_EXPRESSION, "href").size() > 0;
+        logger.debug("got hasFlatvalue: " + result);
+        return result;
     }
 }

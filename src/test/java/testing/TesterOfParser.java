@@ -1,11 +1,11 @@
 package testing;
 
-import com.gargoylesoftware.htmlunit.BrowserVersion;
 import exceptions.IncorrectQuantityTests;
 import org.apache.commons.logging.LogFactory;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
 import ru.cscenter.practice.recsys.FlatPageParser;
 import ru.cscenter.practice.recsys.FlatParser;
 import ru.cscenter.practice.recsys.Parser;
@@ -29,34 +29,35 @@ class TesterOfParser {
     public TesterOfParser(String objectName) {
         this.objectName = objectName;
 
+        LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
+
+        java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.WARNING);
+        java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.WARNING);
+
+        DesiredCapabilities capabilities = new DesiredCapabilities();
+        capabilities.setJavascriptEnabled(true);
+        capabilities.setCapability("takesScreenshot", false);
+
+        webDriver = new FirefoxDriver(capabilities);
+        webDriver.manage().timeouts().setScriptTimeout(15, TimeUnit.SECONDS);
+        webDriver.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
+        webDriver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+
         switch (objectName){
             case "flat" :
-                parser = new FlatParser();
+                parser = new FlatParser(webDriver);
                 break;
             case "user" :
-                parser = new UserParser();
+                parser = new UserParser(webDriver);
                 break;
             case "flatpage" :
-                parser = new FlatPageParser();
+                parser = new FlatPageParser(webDriver);
                 break;
             default:
                 throw new IllegalStateException("Parser doesn't exist for this " + objectName + "expression");
         }
 
 
-        LogFactory.getFactory().setAttribute("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.NoOpLog");
-
-        java.util.logging.Logger.getLogger("com.gargoylesoftware.htmlunit").setLevel(Level.WARNING);
-        java.util.logging.Logger.getLogger("org.apache.commons.httpclient").setLevel(Level.WARNING);
-
-        HtmlUnitDriver htmlUnitDriver = new HtmlUnitDriver(BrowserVersion.FIREFOX_24);
-        htmlUnitDriver.setJavascriptEnabled(true);
-        webDriver = htmlUnitDriver;
-        webDriver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-        webDriver.manage().timeouts().setScriptTimeout(5, TimeUnit.SECONDS);
-        webDriver.manage().timeouts().pageLoadTimeout(5, TimeUnit.SECONDS);
-        webDriver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);
-        webDriver.manage().timeouts().setScriptTimeout(10, TimeUnit.SECONDS);
 
     }
 
@@ -64,7 +65,7 @@ class TesterOfParser {
 
         try {
 
-            Method method = parser.getClass().getMethod(methodName, WebDriver.class);
+            Method method = parser.getClass().getMethod(methodName);
 
             final String[] answers = HtmlResource.getAnswers(objectName, methodName);
             final List<String> addressesOfObjects = HtmlResource.getSample(objectName);
@@ -75,11 +76,12 @@ class TesterOfParser {
             int flatIdposition = 0;
             for (String currentPage : addressesOfObjects) {
                 webDriver.get(currentPage);
-                //Thread.sleep(5000);
-                Object sampleAnswer = method.invoke(parser,webDriver);
+                Object sampleAnswer = method.invoke(parser);
+
+                logger.debug(objectName + " : " + methodName + " : " + "from airbnb: " + sampleAnswer.toString() + " from answers: " + answers[flatIdposition]);
 
                 if (!sampleAnswer.toString().equals(answers[flatIdposition])) {
-                    System.out.println(objectName + " : " + methodName + " : " + sampleAnswer.toString() + " " + answers[flatIdposition]);
+
                     return false;
                 }
 

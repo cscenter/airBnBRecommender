@@ -10,7 +10,7 @@ public class FlatParserTests {
 
     private TesterOfParser tester = new TesterOfParser("flat");
 
-    @Test
+    //@Test
     public void getPricePerNightTest() throws IncorrectQuantityTests {
         Assert.assertEquals(tester.doTest("getPricePerNight"), true);
     }

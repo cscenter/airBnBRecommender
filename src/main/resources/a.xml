@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE mathmech [
+
+                <!ELEMENT mathmech (chair+)>
+
+                <!ELEMENT chair (name,head, student+)>
+
+                <!ELEMENT name (#PCDATA)>
+
+                <!ELEMENT head (#PCDATA)>
+
+                <!ELEMENT student (name, number, exam+)>
+
+                <!ELEMENT number (#PCDATA)>
+
+                <!ELEMENT exam (name, value)>
+                <!ELEMENT value (#PCDATA)>
+
+]>
+
+
+
+
+<mathmech>
+
+    <chair>
+
+        <name>Информационно-аналитических систем</name>
+        <head>Новиков Б.А</head>
+
+        <student>
+            <name>Иван Иванов</name>
+            <number>12</number>
+
+            <exam>
+                <name>Матан</name>
+                <value>5</value>
+            </exam>
+
+            <exam>
+                <name>Алгебра</name>
+                <value>4</value>
+            </exam>
+        </student>
+
+
+        <student>
+            <name>Петр Иванов</name>
+            <number>1</number>
+
+            <exam>
+                <name>Матан</name>
+                <value>5</value>
+            </exam>
+
+            <exam>
+                <name>Алгебра</name>
+                <value>4</value>
+            </exam>
+
+            <exam>
+                <name>Базы данных</name>
+                <value>5</value>
+            </exam>
+        </student>
+
+    </chair>
+
+    <chair>
+
+        <name>Системного программирования</name>
+        <head>Терехов</head>
+
+        <student>
+            <name>Вася Пупкин</name>
+            <number>123</number>
+
+            <exam>
+                <name>Матан</name>
+                <value>3</value>
+            </exam>
+
+            <exam>
+                <name>Алгебра</name>
+                <value>4</value>
+            </exam>
+        </student>
+
+    </chair>
+
+    <chair>
+
+        <name>Параллельных алгоритмов</name>
+        <head>Демьянович</head>
+
+        <student>
+            <name>Гриша Лампочкин</name>
+            <number>1243</number>
+
+            <exam>
+                <name>Информатика</name>
+                <value>5</value>
+            </exam>
+
+            <exam>
+                <name>Алгебра</name>
+                <value>4</value>
+            </exam>
+        </student>
+
+    </chair>
+
+    <chair>
+
+        <name>Информатики</name>
+        <head>Косовский</head>
+
+        <student>
+            <name>Илья Плюшкин</name>
+            <number>16</number>
+
+            <exam>
+                <name>Мат.логика</name>
+                <value>3</value>
+            </exam>
+
+            <exam>
+                <name>Алгебра</name>
+                <value>4</value>
+            </exam>
+        </student>
+
+    </chair>
+
+</mathmech>

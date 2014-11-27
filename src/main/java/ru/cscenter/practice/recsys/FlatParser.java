@@ -31,78 +31,80 @@ public class FlatParser extends Parser {
     private static final Logger logger = Logger.getLogger(FlatParser.class.getName());
 
 
-    public FlatParser() {
+    public FlatParser(WebDriver htmlPage) {
+        super(htmlPage);
     }
 
-    public Flat parse(final WebDriver htmlPage) {
-
-        if (htmlPage == null) {
-            throw new IllegalArgumentException("html page can't be null");
-        }
-
+    public Flat parse() {
 
         Flat.FlatBuilder flatBuilder = new Flat.FlatBuilder();
 
-        setAmenities(getAmenities(htmlPage), flatBuilder);
-        setLocation(htmlPage, flatBuilder);
+        setAmenities(getAmenities(), flatBuilder);
+        setLocation(flatBuilder);
 
-        flatBuilder.setDescription(getDescription(htmlPage));
-        flatBuilder.setPricePerNight(getPricePerNight(htmlPage));
-        flatBuilder.setCurrency(getCurrency(htmlPage));
-        flatBuilder.setTitle(getFlatTitle(htmlPage));
-        flatBuilder.setBedrooms(getQuantityBedrooms(htmlPage));
-        flatBuilder.setBeds(getQuantityBeds(htmlPage));
-        flatBuilder.setBathrooms(getQuantityBathrooms(htmlPage));
-        flatBuilder.setAccomodates(getQuantityAccommodates(htmlPage));
-        flatBuilder.setTypeProperty(getPropertyType(htmlPage));
-        flatBuilder.setCountReview(getCountReviews(htmlPage));
-        flatBuilder.setRatingValue(getRating(htmlPage));
-        flatBuilder.setId(getId(htmlPage));
+        flatBuilder.setDescription(getDescription());
+        flatBuilder.setPricePerNight(getPricePerNight());
+        flatBuilder.setCurrency(getCurrency());
+        flatBuilder.setTitle(getFlatTitle());
+        flatBuilder.setBedrooms(getQuantityBedrooms());
+        flatBuilder.setBeds(getQuantityBeds());
+        flatBuilder.setBathrooms(getQuantityBathrooms());
+        flatBuilder.setAccomodates(getQuantityAccommodates());
+        flatBuilder.setTypeProperty(getPropertyType());
+        flatBuilder.setCountReview(getCountReviews());
+        flatBuilder.setRatingValue(getRating());
+        flatBuilder.setId(getId());
 
         return flatBuilder.build();
 
     }
 
-    public static List<String> getAmenities(final WebDriver htmlPage) {
-        clickAndWait(htmlPage, LOAD_AMENITIES);
-
-        List<String> amenities = getFeatures(htmlPage, AMENITIES_EXPRESSION);
+    public List<String> getAmenities() {
+        clickAndWait(LOAD_AMENITIES);
+        List<String> amenities = getFeatures(AMENITIES_EXPRESSION);
         List<String> result = new ArrayList<>();
 
         for (String amenity : amenities) {
             result.add(removeSkipSymbols(amenity));
         }
+
+        logger.debug("got amenities: " + result.toString());
+
         return result;
     }
 
-    public static String getDescription(final WebDriver htmlPage) {
+    public String getDescription() {
         String description = "";
 
         try {
-            description = removeSkipSymbols(getFeature(htmlPage, DESCRIPTION_EXPRESSION));
+            description = removeSkipSymbols(getFeature(DESCRIPTION_EXPRESSION));
         } catch (NoAreasException | TooManyAreasException e) {
-            logger.debug(e.getMessage() + " description");
+            logger.debug(e.getMessage() + " from description");
         }
+
+        logger.debug("got description: " +  (description.length() > 0 ? description.substring(0, description.length() % 20) : ""));
 
         return description;
     }
 
-    public static String getLocation(final WebDriver htmlPage) {
+    public String getLocation() {
         String location = "";
 
         try {
-            location = getFeature(htmlPage, LOCATION_EXPRESSION);
+            location = getFeature(LOCATION_EXPRESSION);
         } catch (NoAreasException | TooManyAreasException e) {
-            logger.debug(e.getMessage() + " location");
+            logger.debug(e.getMessage() + " from location");
         }
+
+        logger.debug("got location: " + ((location.length() > 0) ?  location.substring(0, location.length() % 20) : ""));
 
         return location;
     }
 
-    public static int getPricePerNight(final WebDriver htmlPage) {
+    public int getPricePerNight() {
         String price = "";
         try {
-            price = getFeature(htmlPage, PRICE_EXPRESSION);
+            price = getFeature(PRICE_EXPRESSION);
         } catch (NoAreasException | TooManyAreasException e) {
             logger.debug(e.getMessage() + "Price");
         }
@@ -110,104 +112,121 @@ public class FlatParser extends Parser {
         return getNumber(price);
     }
 
-    public static Currency getCurrency(final WebDriver htmlPage) {
+    public String getCurrency() {
 
         String currency = "";
         try {
-            currency = getFeature(htmlPage, PRICE_EXPRESSION);
+            currency = getFeature(PRICE_EXPRESSION);
         } catch (NoAreasException | TooManyAreasException e) {
-            logger.debug(e.getMessage() + "Currency");
+            logger.debug(e.getMessage() + " from Currency");
         }
 
-        if (currency.contains("$"))
-            return Currency.getInstance("USD");
-        else if (currency.contains("p") || currency.contains("р")) //the second p is in Russian
-            return Currency.getInstance("RUB");
+        String resultCurrency = "";
 
-        return null;
+        if (currency.contains("$")) {
+            resultCurrency = "USD";
+        }
+        else if (currency.contains("p") || currency.contains("р")) //the second p is in Russian
+            resultCurrency = "RUB";
+
+        logger.debug("got Currency: " + resultCurrency);
+
+        return resultCurrency;
     }
 
-    public static String getFlatTitle(final WebDriver htmlPage) {
+    public  String getFlatTitle() {
         String title = "";
         try {
-            title = getFeature(htmlPage, TITLE_EXPRESSION);
+            title = getFeature(TITLE_EXPRESSION);
         } catch (TooManyAreasException | NoAreasException e) {
-            logger.debug(e.getMessage() + " title");
+            logger.debug(e.getMessage() + " from title");
         }
 
-        return removeSkipSymbols(title);
+        title = removeSkipSymbols(title);
+
+        logger.debug("got title: " + (title.length() > 0 ? title.substring(0, title.length() % 20) : ""));
+
+        return title;
     }
 
-    private static String getListing(final WebDriver htmlPage, final String expression) {
-        final List<String> listing = getFeatures(htmlPage, LISTING_EXPRESSION);
+    private  String getListing(final String expression) {
+        final List<String> listing = getFeatures(LISTING_EXPRESSION);
 
         for (String currentListing : listing) {
-            if (removeSkipSymbols(currentListing).contains(expression))
+            if (removeSkipSymbols(currentListing).contains(expression)) {
+                logger.debug("got " + currentListing);
                 return currentListing;
+            }
         }
 
         logger.debug("No listings with such expression " + expression);
         return "";
     }
 
-    public static int getQuantityBedrooms(final WebDriver htmlPage) {
-        return getNumber(getListing(htmlPage, "Bedrooms:"));
+    public  int getQuantityBedrooms() {
+        return getNumber(getListing("Bedrooms:"));
     }
 
-    public static int getQuantityBathrooms(final WebDriver htmlPage) {
-        return getNumber(getListing(htmlPage, "Bathrooms:"));
+    public  int getQuantityBathrooms() {
+        return getNumber(getListing("Bathrooms:"));
     }
 
-    public static int getQuantityBeds(final WebDriver htmlPage) {
-        return getNumber(getListing(htmlPage, "Beds:"));
+    public  int getQuantityBeds() {
+        return getNumber(getListing("Beds:"));
     }
 
-    public static int getQuantityAccommodates(final WebDriver htmlPage) {
-        return getNumber(getListing(htmlPage, "Accommodates:"));
+    public  int getQuantityAccommodates() {
+        return getNumber(getListing("Accommodates:"));
     }
 
-    public static PropertyType getPropertyType(final WebDriver htmlPage) {
-        return PropertyType.getPropertyType(getListing(htmlPage, "Property type:").replaceAll("Property type: ", ""));
+    public  PropertyType getPropertyType() {
+        return PropertyType.getPropertyType(getListing("Property type:").replaceAll("Property type: ", ""));
     }
 
-    public static int getId(final WebDriver htmlPage) {
+    public  int getId() {
         String id = null;
         try {
-            id = getFeature(htmlPage, ID_EXPRESSION, "value");
+            id = getFeature(ID_EXPRESSION, "value");
         } catch (TooManyAreasException | NoAreasException e) {
             logger.debug(e.getMessage() + " id");
         }
 
+        logger.debug("got id: " + id);
+
         return getNumber(id);
     }
 
-    public static int getCountReviews(final WebDriver htmlPage) {
+    public  int getCountReviews() {
         String result = "";
 
         try {
-            result = getFeature(htmlPage, COUNT_REVIEW_EXPRESSION);
+            result = getFeature(COUNT_REVIEW_EXPRESSION);
         } catch (TooManyAreasException e) {
             logger.debug(e.getMessage() + " count review");
         } catch (NoAreasException e) {
             // ignore because exist flats without reviews
         }
 
+        logger.debug("get countreviews: " + result);
+
         return getNumber(result);
     }
 
-    public static int getRating(WebDriver htmlPage) {
-        final int countStars = countFeatures(htmlPage, COUNT_RATING_EXPRESSION + "/i[@class='icon icon-pink icon-beach icon-star']");
-        final int countHalfStars = countFeatures(htmlPage, COUNT_RATING_EXPRESSION + "/i[@class='icon icon-pink icon-beach icon-star-half']");
+    public  int getRating() {
+        final int countStars = countFeatures(COUNT_RATING_EXPRESSION + "/i[@class='icon icon-pink icon-beach icon-star']");
+        final int countHalfStars = countFeatures(COUNT_RATING_EXPRESSION + "/i[@class='icon icon-pink icon-beach icon-star-half']");
+        logger.debug("got rating: " + 2 * countStars + countHalfStars );
         return 2 * countStars + countHalfStars;
     }
 
-    private static void setAmenities(final List<String> amenities, final Flat.FlatBuilder builder) {
+    private  void setAmenities(final List<String> amenities, final Flat.FlatBuilder builder) {
         final HashSet<String> amenitiesSet = new HashSet<>();
         for (String currentAmenities : amenities)
             amenitiesSet.add(currentAmenities.toLowerCase());
 
         final boolean active = true;
-
+        if (amenitiesSet.contains("essentials"))
+            builder.setTv(active);
         if (amenitiesSet.contains("tv"))
             builder.setTv(active);
         if (amenitiesSet.contains("cable tv"))
@@ -258,19 +277,19 @@ public class FlatParser extends Parser {
             builder.setWheelchairAccessible(active);
         if (amenitiesSet.contains("smoke detector"))
             builder.setSmokeDetector(active);
-        if (amenitiesSet.contains("carbon monooxide detector"))
+        if (amenitiesSet.contains("carbon monoxide detector"))
             builder.setCarbonMonoxideDetector(active);
         if (amenitiesSet.contains("first aid kit"))
             builder.setFirstAidKit(active);
         if (amenitiesSet.contains("safety card"))
             builder.setSafetyCard(active);
-        if (amenitiesSet.contains("fire extinguiser"))
+        if (amenitiesSet.contains("fire extinguisher"))
             builder.setFireExtinguiser(active);
 
     }
 
-    private static void setLocation(final WebDriver htmlPage, final Flat.FlatBuilder builder) {
-        final String location = getLocation(htmlPage);
+    private  void setLocation(final Flat.FlatBuilder builder) {
+        final String location = getLocation();
 
         if (location.equals(""))
             return;
@@ -290,16 +309,18 @@ public class FlatParser extends Parser {
 
     }
 
-    public static List<Integer> getUserIdsFromComments(final WebDriver htmlPage) {
+    public List<Integer> getUserIdsFromComments() {
 
         final List<Integer> result = new ArrayList<>();
 
         List<String> userIds;
         do {
-            userIds = getFeatures(htmlPage, USER_IDS_EXPRESSION, "href");
+            userIds = getFeatures(USER_IDS_EXPRESSION, "href");
             for (String currentUserId : userIds)
                 result.add(getNumber(currentUserId));
-        } while (Parser.clickAndWait(htmlPage, LOAD_MORE_COMMENTS));
+        } while (clickAndWait(LOAD_MORE_COMMENTS));
+
+        logger.debug("got user's ids from comments: " + result.size() + (result.size() > 0 ? " [" + result.get(0) + ", ...]" : ""));
 
         return result;
     }

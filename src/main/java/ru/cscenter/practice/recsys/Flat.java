@@ -3,7 +3,6 @@ package ru.cscenter.practice.recsys;
 import ru.cscenter.practice.recsys.enums.PropertyType;
 
 import java.io.Serializable;
-import java.util.Currency;
 
 /* this class will make you cry */
 
@@ -18,7 +17,7 @@ public class Flat implements Serializable {
 
     /* Pricing */
     private final int pricePerNight;
-    private final Currency currency;
+    private final String currency;
 
     /* Overview */
     private final String title;
@@ -143,7 +142,7 @@ public class Flat implements Serializable {
         return pricePerNight;
     }
 
-    public Currency getCurrency() {
+    public String getCurrency() {
         return currency;
     }
 
@@ -464,7 +463,7 @@ public class Flat implements Serializable {
 
         /* Pricing */
         private int pricePerNight;
-        private Currency currency;
+        private String currency;
 
         /* Overview */
         private String title;
@@ -541,7 +540,7 @@ public class Flat implements Serializable {
             this.pricePerNight = pricePerNight;
         }
 
-        public void setCurrency(Currency currency) {
+        public void setCurrency(String currency) {
             this.currency = currency;
         }
 

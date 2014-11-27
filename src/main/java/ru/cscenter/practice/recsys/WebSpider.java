@@ -2,17 +2,21 @@ package ru.cscenter.practice.recsys;
 
 import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import ru.cscenter.practice.recsys.database.DataBaseQueue;
+import ru.cscenter.practice.recsys.database.FlatDao;
+import ru.cscenter.practice.recsys.database.Pair;
+import ru.cscenter.practice.recsys.database.UserDao;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class WebSpider {
     private static final String FLAT_ADDRESS = "https://www.airbnb.com/rooms/";
     private static final String USER_ADDRESS = "https://www.airbnb.com/users/show/";
     private static final String FLATS_OF_USER_EXPRESSION = "https://www.airbnb.com/s?host_id=";
+    private static final int QUANTITY_USERS_IN_AIRBNB = 30_000_000;
     private final Logger logger = Logger.getLogger(WebSpider.class.getName());
     private final WebDriver webDriver;
 
@@ -20,151 +24,99 @@ public class WebSpider {
         this.webDriver = webDriver;
     }
 
-    //TODO: all functions are starting with lowercase
-    public void DiscoverHostUsersThenFlats(int globalHostUserId, final int quantityFlats, final int quantityUsers)
-            throws IOException {
-        if (globalHostUserId <= 0 || quantityFlats < 0 || quantityUsers < 0) {
+    public void discoverHostUsersThenFlats(int globalHostUserId) {
+        if (globalHostUserId <= 0) {
             throw new IllegalArgumentException("parameters have illegal values");
         }
 
-        final LinkedList<Pair<Integer, Integer>> usersQueue = new LinkedList<>();
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("config.xml");
+        final DataBaseQueue usersQueue = (DataBaseQueue) applicationContext.getBean("dataBaseQueue", DataBaseQueue.class);
+        final FlatDao flatDao = (FlatDao) applicationContext.getBean("flatDao", FlatDao.class);
+        final UserDao userDao = (UserDao) applicationContext.getBean("userDao", UserDao.class);
 
-        final FlatParser flatParser = new FlatParser();
-        final UserParser userParser = new UserParser();
-        final FlatPageParser flatPageParser = new FlatPageParser();
+        final FlatParser flatParser = new FlatParser(webDriver);
+        final UserParser userParser = new UserParser(webDriver);
+        final FlatPageParser flatPageParser = new FlatPageParser(webDriver);
+
         List<Integer> usersFromComments;
         List<Integer> listiningsOfHostUser;
         List<Integer> usersFromFlatComments;
 
-        int countFlats = 0, countUsers = 0;
         boolean hasFlats;
 
-        //TODO: На весь парсинг Airbnb один не рвущийся коннект - это супер-оптимизм :) Советую Spring-jdbc
-        //TODO: В этом случае класс Database connect рассыпется на несколько менеджеров для работы с БД:
-        //TODO: FlatManager, UserManager, LanguageManager и каждый их них будет сприговый jdbcTemplate.
-        //TODO: Эти менеджеры только работают с БД посредством jdbcTemplate, но сами не устанавливают коннекты и не закрывают их
-        //TODO: Алгоритм должен быть как можно более устойчивым к падениям ошибок из html,разрывам коннектов с БД
-        //TODO: и разрывам сети. Сейчас работа с БД - это главная уязвимость алгоритма: коннект рвется и все накрывается.
-        //TODO: Если что-то не получается сделать для текущего юзера и вылетает экспшн - ловим, обрабтываем и переходим
-        //TODO: к следующему. То же самое квартира
-        try (DatabaseConnect connection = new DatabaseConnect()) {
-            while (countFlats < quantityFlats || countUsers < quantityUsers) {
-                if (usersQueue.size() == 0) {
-                    usersQueue.push(Pair.of(globalHostUserId++, -1));
-                }
 
-                final Pair<Integer, Integer> currentHostUser = usersQueue.pop();
+        while (globalHostUserId < QUANTITY_USERS_IN_AIRBNB) {
 
-                if (currentHostUser.snd() != -1) {
-                    connection.putVisitedFlat(currentHostUser.fst(), currentHostUser.snd());
-                }
+            if (usersQueue.size() == 0) {
+                usersQueue.push(Pair.of(globalHostUserId++, -1));
+            }
 
-                if (connection.containsUser(currentHostUser.fst())) {
-                    continue;
-                }
+            final Pair<Integer, Integer> currentHostUser = usersQueue.pop();
 
-                logger.debug("processing user " + currentHostUser.fst);
+            if (currentHostUser.snd() != -1) {
+                userDao.putVisitedFlat(currentHostUser.fst(), currentHostUser.snd());
+            }
 
-                webDriver.get(USER_ADDRESS + currentHostUser.fst());
-                final User newUser = userParser.parse(webDriver);
-                usersFromComments = UserParser.getUserHostIdsFromComments(webDriver);
-                hasFlats = UserParser.hasFlats(webDriver);
+            if (userDao.contains(currentHostUser.fst())) {
+                continue;
+            }
+
+            logger.info("processing user " + currentHostUser.fst());
+
+            downloadNewPage(USER_ADDRESS + currentHostUser.fst());
+
+            final User newUser = userParser.parse();
+            usersFromComments = userParser.getUserHostIdsFromComments();
+            hasFlats = userParser.hasFlats();
 
 
-                if ((newUser.getId() == 0) ||
-                        ((usersFromComments.size() == 0) && !hasFlats && (currentHostUser.snd == -1))) {
-                    continue;
-                }
+            if ((newUser.getId() == 0) ||
+                    ((usersFromComments.size() == 0) && !hasFlats && (currentHostUser.snd() == -1))) {
+                logger.info("skip this user " + currentHostUser.fst());
+                continue;
+            }
 
-                connection.putUserIntoDatabase(newUser);
-                ++countUsers;
-                usersQueue.addAll(makeArrayOfPair(usersFromComments, -1));
+            userDao.put(newUser);
 
+            if(currentHostUser.snd() != -1)
+                userDao.putVisitedFlat(currentHostUser.snd(), currentHostUser.fst());
+            usersQueue.addAll(Pair.makeArrayOfPair(usersFromComments, -1));
 
-                if (hasFlats) {
-                    webDriver.get(FLATS_OF_USER_EXPRESSION + currentHostUser.fst);
-                    listiningsOfHostUser = flatPageParser.parse(webDriver);
+            logger.info("user is put into db");
 
-                    for (Integer currentFlatId : listiningsOfHostUser) {
-                        if (connection.containsFlat(currentFlatId)) {
-                            continue;
-                        }
+            if (hasFlats) {
+                downloadNewPage(FLATS_OF_USER_EXPRESSION + currentHostUser.fst());
+                listiningsOfHostUser = flatPageParser.parse();
 
-                        logger.debug("processing flat " + currentFlatId);
-
-                        webDriver.get(FLAT_ADDRESS + currentFlatId);
-                        final Flat flat = flatParser.parse(webDriver);
-
-                        if (flat.getId() == 0) {
-                            continue;
-                        }
-
-                        connection.putFlatIntoDatabase(flat);
-                        ++countFlats;
-
-                        usersFromFlatComments = flatParser.getUserIdsFromComments(webDriver);
-                        usersQueue.addAll(makeArrayOfPair(usersFromFlatComments, currentFlatId));
+                for (Integer currentFlatId : listiningsOfHostUser) {
+                    if (flatDao.contains(currentFlatId)) {
+                        continue;
                     }
+
+                    logger.info("processing flat " + currentFlatId);
+
+                    downloadNewPage(FLAT_ADDRESS + currentFlatId);
+                    final Flat flat = flatParser.parse();
+
+                    if (flat.getId() == 0) {
+                        continue;
+                    }
+
+                    flatDao.put(flat);
+
+                    logger.info("flat is put into db");
+
+                    usersFromFlatComments = flatParser.getUserIdsFromComments();
+                    usersQueue.addAll(Pair.makeArrayOfPair(usersFromFlatComments, currentFlatId));
                 }
             }
-        } catch (SQLException e) {
-            logger.debug(e.getMessage());
         }
-
-        logger.debug("users : " + countUsers + " flats: " + countFlats);
-
     }
 
-    private List<Pair<Integer, Integer>> makeArrayOfPair(final List<Integer> arrayOfUsers, final Integer flatId) {
-        final List<Pair<Integer, Integer>> result = new ArrayList<>();
-
-        for (Integer currentUserIdFromComment : arrayOfUsers)
-            result.add(Pair.of(currentUserIdFromComment, flatId));
-        return result;
+    private void downloadNewPage(String address) {
+        webDriver.get(address);
+        webDriver.manage().timeouts().setScriptTimeout(5, TimeUnit.SECONDS);
+        webDriver.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
+        webDriver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
     }
-
-    private static class Pair<A, B> {
-
-        private final A fst;
-        private final B snd;
-
-        private Pair(A a, B b) {
-            this.fst = a;
-            this.snd = b;
-        }
-
-
-        public A fst() {
-            return fst;
-        }
-
-        public B snd() {
-            return snd;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            Pair pair = (Pair) o;
-
-            if (fst != null ? !fst.equals(pair.fst) : pair.fst != null) return false;
-            return !(snd != null ? !snd.equals(pair.snd) : pair.snd != null);
-
-        }
-
-        @Override
-        public int hashCode() {
-            int result = fst != null ? fst.hashCode() : 0;
-            result = 31 * result + (snd != null ? snd.hashCode() : 0);
-            return result;
-        }
-
-        public static <A, B> Pair<A, B> of(A a, B b) {
-            return new Pair(a, b);
-        }
-
-    }
-
 }

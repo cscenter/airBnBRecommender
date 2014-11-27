@@ -1,27 +1,48 @@
 package ru.cscenter.practice.recsys;
 
 import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import ru.cscenter.practice.recsys.exceptions.NoAreasException;
 import ru.cscenter.practice.recsys.exceptions.TooManyAreasException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public abstract class Parser<T> {
 
-    //TODO: Webdriver сделать полем класса парсер, чтобы не передавать в каждый метод
-    //TODO: А методы будут не статические
+    private final WebDriver htmlPage;
+    private final int TIMEOUT_FOR_FEATURES = 1; // in seconds
+    private final int TIMEOUT_FOR_BUTTON = 1; // in seconds
+    private final int FREQUENCY = 200; // in milliseconds
+    public abstract T parse();
 
-    public abstract T parse(final WebDriver htmlPage);
+    public Parser(WebDriver htmlPage) {
 
-    public static List<String> getFeatures(final WebDriver htmlPage, final String expression, String attribute) {
+        if(htmlPage == null)
+            throw new IllegalArgumentException("driver's provided html page is null");
+
+        this.htmlPage = htmlPage;
+    }
+
+    public List<String> getFeatures(final String expression, String attribute) {
         if (expression == null)
             return new ArrayList<>();
 
-        List<WebElement> items = htmlPage.findElements(By.xpath(expression));
 
+        List<WebElement> items;
         final List<String> result = new ArrayList<>();
+        WebDriverWait wait = new WebDriverWait(htmlPage, TIMEOUT_FOR_FEATURES, FREQUENCY);
+
+        try {
+            wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.xpath(expression)));
+            items = htmlPage.findElements(By.xpath(expression));
+        } catch (NoSuchElementException | ElementNotVisibleException | TimeoutException e) {
+            return result;
+        }
+
 
         for (WebElement item : items) {
             if (attribute != null)
@@ -29,17 +50,18 @@ public abstract class Parser<T> {
             else
                 result.add(item.getText());
         }
+
         return result;
 
     }
 
-    public static List<String> getFeatures(final WebDriver htmlPage, final String expression) {
-        return getFeatures(htmlPage, expression, null);
+    public List<String> getFeatures(final String expression) {
+        return getFeatures(expression, null);
     }
 
 
-    public static String getFeature(final WebDriver htmlPage, final String expression, final String attribute) throws TooManyAreasException, NoAreasException {
-        final List<String> result = getFeatures(htmlPage, expression, attribute);
+    public String getFeature(final String expression, final String attribute) throws TooManyAreasException, NoAreasException {
+        final List<String> result = getFeatures(expression, attribute);
         if (result.size() > 1)
             throw new TooManyAreasException("html file contains more than one areas that fit for object");
         if (result.size() == 0)
@@ -48,19 +70,19 @@ public abstract class Parser<T> {
         return result.get(0);
     }
 
-    public static String getFeature(final WebDriver htmlPage, final String expression) throws TooManyAreasException, NoAreasException {
-        return getFeature(htmlPage, expression, null);
+    public String getFeature(final String expression) throws TooManyAreasException, NoAreasException {
+        return getFeature(expression, null);
     }
 
-    public static int countFeatures(final WebDriver htmlPage, final String expression, final String attribute) {
+    public int countFeatures(final String expression, final String attribute) {
 
-        final List<String> features = getFeatures(htmlPage, expression, attribute);
+        final List<String> features = getFeatures(expression, attribute);
         return features.size();
     }
 
-    public static int countFeatures(final WebDriver htmlPage, final String expression) {
+    public int countFeatures(final String expression) {
 
-        return countFeatures(htmlPage, expression, null);
+        return countFeatures(expression, null);
     }
 
     public static int getNumber(final String string) // if string contains more than one number then method return wrong number
@@ -90,12 +112,19 @@ public abstract class Parser<T> {
         return builder.toString();
     }
 
-    public static boolean clickAndWait(WebDriver htmlPage, String expression) {
+    public boolean clickAndWait(String expression) {
         try {
-            WebElement nextPage = htmlPage.findElement(By.xpath(expression));
+
+            WebElement nextPage = new WebDriverWait(htmlPage, TIMEOUT_FOR_BUTTON, FREQUENCY)
+                    .until(ExpectedConditions.presenceOfElementLocated(By.xpath(expression)));
+
             nextPage.click();
-            Thread.sleep(100);
-        } catch (NoSuchElementException | ElementNotVisibleException e) {
+            htmlPage.manage().timeouts().setScriptTimeout(5, TimeUnit.SECONDS);
+            htmlPage.manage().timeouts().pageLoadTimeout(15, TimeUnit.SECONDS);
+            htmlPage.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
+            Thread.sleep(2000);
+
+        } catch (NoSuchElementException | ElementNotVisibleException | TimeoutException  e) {
             return false;
         } catch (Exception e) {
             e.printStackTrace();

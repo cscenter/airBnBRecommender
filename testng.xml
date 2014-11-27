@@ -3,8 +3,7 @@
 <suite name="RecommenderSystem Test Unit">
     <test name="Test">
         <classes>
-            <class name="testing.UserParserTests"/>
-            <class name="testing.FlatParserTests"/>
+            <class name="testing.UserParserTests" />
         </classes>
     </test>
 </suite>

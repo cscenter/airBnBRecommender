@@ -74,3 +74,7 @@ create table language (
 create table languagesOfUser (
     language int references language,
     user int references users);
+
+create table queue (
+      userid int,
+      flatid int);

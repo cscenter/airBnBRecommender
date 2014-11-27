@@ -20,11 +20,6 @@
         </layout>
     </appender>
 
-    <logger name="com.gargoylesoftware">
-        <level value="WARNING"/>
-        <appender-ref ref="console"/>
-    </logger>
-
     <root>
         <level value="DEBUG"/>
         <appender-ref ref="console"/>

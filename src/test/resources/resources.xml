@@ -48,7 +48,7 @@
                 <id>2058080</id>
                 <pricepernight>6056</pricepernight>
                 <quantityaccommodates>7</quantityaccommodates>
-                <countreviews>37</countreviews>
+                <countreviews>38</countreviews>
                 <rating>10</rating>
                 <Propertytype>Apartment</Propertytype>
                 <quantitybeds>4</quantitybeds>
@@ -66,8 +66,8 @@
                 <id>3722745</id>
                 <pricepernight>2433</pricepernight>
                 <quantityaccommodates>3</quantityaccommodates>
-                <countreviews>0</countreviews>
-                <rating>0</rating>
+                <countreviews>5</countreviews>
+                <rating>9</rating>
                 <Propertytype>House</Propertytype>
                 <quantitybeds>3</quantitybeds>
                 <quantitybathrooms>1</quantitybathrooms>
@@ -118,7 +118,7 @@
         <flatpages>
 
             <flatpage>
-                <parse>[2609811, 4400821, 185107, 165497, 909617, 436405, 3253391, 311464, 108572, 428699, 1278209, 889777, 1514264, 1962377, 2028712, 697761, 2042019, 3735677, 163172, 3838594, 122861, 133344, 227089, 1762248, 108578, 108583]</parse>
+                <parse>[1962377, 4400821, 108572, 185107, 889777, 1278209, 909617, 2028712, 436405, 428699, 165497, 2042019, 133344, 311464, 1762248, 1514264, 108583, 3838594, 697761, 227089, 163172, 3735677, 2609811, 122861, 108578]</parse>
             </flatpage>
 
             <flatpage>
@@ -126,7 +126,7 @@
             </flatpage>
 
             <flatpage>
-                <parse>[1198102, 194998, 106646]</parse>
+                <parse>[194998, 1198102, 106646]</parse>
             </flatpage>
 
         </flatpages>

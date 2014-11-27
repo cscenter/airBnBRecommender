@@ -1,6 +1,7 @@
 package ru.cscenter.practice.recsys;
 
 
+import org.apache.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 
 import java.util.ArrayList;
@@ -13,17 +14,24 @@ public class FlatPageParser extends Parser {
             "/div[@class = 'listing']";
 
     private static final String LOAD_MORE_FLATS = "//li[@class='next next_page']/a";
+    private static final Logger logger = org.apache.log4j.Logger.getLogger(FlatParser.class.getName());
 
-    public List<Integer> parse(final WebDriver htmlPage) {
+    public FlatPageParser(WebDriver htmlPage){
+        super(htmlPage);
+    }
+
+    public List<Integer> parse() {
         final List<Integer> result = new ArrayList<>();
         List<String> flatIds;
 
         do {
-            flatIds = getFeatures(htmlPage, FLAT_ID_EXPRESSION, "data-id");
+            flatIds = getFeatures(FLAT_ID_EXPRESSION, "data-id");
             for (String currentId : flatIds) {
                 result.add(getNumber(currentId));
             }
-        } while (Parser.clickAndWait(htmlPage, LOAD_MORE_FLATS));
+        } while (clickAndWait(LOAD_MORE_FLATS));
+
+        logger.debug("got  user's flats ids: " + result.toString());
 
         return result;
     }
